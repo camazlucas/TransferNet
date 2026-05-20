@@ -14,7 +14,7 @@ import re
 
 
 def encode_kb(args, vocab):
-    with open(os.path.join(args.input_dir, 'kb/kb.txt')) as f:
+    with open(os.path.join(args.input_dir, 'kb/kb.txt'), encoding='utf-8') as f:
         kb = f.readlines()
     
     Msubj = []
@@ -75,7 +75,7 @@ def encode_qa(args, vocab):
     for dataset in ['train', 'test', 'dev']:
         data = []
         for hop in hops:
-            with open(os.path.join(args.input_dir, (hop + '/vanilla/qa_%s.txt'%(dataset)))) as f:
+            with open(os.path.join(args.input_dir, (hop + '/vanilla/qa_%s.txt'%(dataset))), encoding='utf-8') as f:
                 qas = f.readlines()
                 for qa in qas:
                     question, answers = qa.strip().split('\t')
