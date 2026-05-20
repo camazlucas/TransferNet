@@ -135,14 +135,14 @@ def main():
     # make logging.info display into both shell and file
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
-    time_ = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime())
+    time_ = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     args.log_name = time_ + '_{}_{}_{}.log'.format(args.opt, args.lr, args.batch_size)
     fileHandler = logging.FileHandler(os.path.join(args.save_dir, args.log_name))
     fileHandler.setFormatter(logFormatter)
     rootLogger.addHandler(fileHandler)
     # args display
     for k, v in vars(args).items():
-        logging.info(k+':'+str(v))
+        logging.info(k+'-'+str(v))
 
     if args.ratio < 1:
         args.num_epoch = int(args.num_epoch / args.ratio)
