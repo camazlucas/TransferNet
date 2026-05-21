@@ -8,6 +8,7 @@ from collections import defaultdict
 from utils.misc import MetricLogger, load_glove, idx_to_one_hot
 from .data import DataLoader
 from .model import TransferNet
+import time
 
 from IPython import embed
 
@@ -18,6 +19,8 @@ def validate(args, model, data, device, verbose = False):
     count = defaultdict(int)
     correct = defaultdict(int)
     with torch.no_grad():
+        #medindo tempo total
+        total_start = time.time()
         for batch in tqdm(data, total=len(data)):
             questions, topic_entities, answers, hops = batch
             topic_entities = idx_to_one_hot(topic_entities, len(vocab['entity2id']))
@@ -60,6 +63,12 @@ def validate(args, model, data, device, verbose = False):
                     print('> golden: {}'.format('; '.join([vocab['id2entity'][_] for _ in range(len(answers[i])) if answers[i][_].item() == 1])))
                     print('> prediction: {}'.format('; '.join([vocab['id2entity'][_] for _ in range(len(answers[i])) if e_score[i][_].item() > 0.9])))
                     embed()
+        #medindo tempo total
+        total_time = total_end - total_start
+        total_questions = count['all']
+
+        print(f"Total inference time: {total_time:.4f}s")
+        print(f"Average per question: {total_time/total_questions:.6f}s")
     acc = {k:correct[k]/count[k] for k in count}
     result = ' | '.join(['%s:%.4f'%(key, value) for key, value in acc.items()])
     print(result)
