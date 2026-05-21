@@ -71,7 +71,7 @@ python -m MetaQA-KB.train --glove_pt <PATH/TO/GLOVE/PICKLE> --input_dir <PATH/TO
 ```shell
 python -m MetaQA-KB.predict --input_dir <PATH/TO/PROCESSED/FILES> --ckpt <PATH/TO/CHECKPOINT> --mode test
 ```
-python -m MetaQA-KB.predict --input_dir MetaQA-KG/ProcessedFiles --ckpt MetaQA-KG/ProcessedFiles/model_epoch-1_acc-0.9931.pt --mode test
+python -m MetaQA-KB.predict --input_dir MetaQA-KB/ProcessedFiles --ckpt MetaQA-KB/ProcessedFiles/model_epoch-1_acc-0.9931.pt --mode test
 
 4. Visualize the reasoning process. It will enter an IPython environment after showing the information of each sample. You can print more variables that you are insterested in. To stop the process, you need to quit the IPython by `Ctrl+D` and then kill the loop by `Ctrl+C` immediately.
 ```shell
