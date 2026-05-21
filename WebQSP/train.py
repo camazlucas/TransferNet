@@ -1,6 +1,7 @@
 import os
 import torch
 import torch.optim as optim
+from torch.optim import AdamW
 import torch.nn as nn
 import argparse
 import shutil
@@ -12,7 +13,6 @@ from utils.lr_scheduler import get_linear_schedule_with_warmup
 from .data import load_data
 from .model import TransferNet
 from .predict import validate
-from transformers import AdamW
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)-8s %(message)s')
 logFormatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
