@@ -52,7 +52,7 @@ class DataLoader(torch.utils.data.DataLoader):
 
         sub_map = defaultdict(list)
         so_map = defaultdict(list)
-        for line in open(os.path.join(input_dir, 'fbwq_full/train.txt')):
+        for line in open(os.path.join(input_dir, 'FB_full.txt')):
             l = line.strip().split('\t')
             s = l[0].strip()
             p = l[1].strip()
@@ -117,18 +117,18 @@ def load_data(input_dir, bert_name, batch_size):
     else:
         print('Read data...')
         ent2id = {}
-        for line in open(os.path.join(input_dir, 'fbwq_full/entities.dict')):
+        for line in open(os.path.join(input_dir, 'entities_full.dict')):
             l = line.strip().split('\t')
             ent2id[l[0].strip()] = len(ent2id)
         # print(len(ent2id))
         # print(max(ent2id.values()))
         rel2id = {}
-        for line in open(os.path.join(input_dir, 'fbwq_full/relations.dict')):
+        for line in open(os.path.join(input_dir, 'relations_full.dict')):
             l = line.strip().split('\t')
             rel2id[l[0].strip()] = int(l[1])
 
         triples = []
-        for line in open(os.path.join(input_dir, 'fbwq_full/train.txt')):
+        for line in open(os.path.join(input_dir, 'FB_full.txt')):
             l = line.strip().split('\t')
             s = ent2id[l[0].strip()]
             p = rel2id[l[1].strip()]
@@ -138,8 +138,8 @@ def load_data(input_dir, bert_name, batch_size):
             triples.append((o, p_rev, s))
         triples = torch.LongTensor(triples)
 
-        train_data = DataLoader(input_dir, os.path.join(input_dir, 'QA_data/WebQuestionsSP/qa_train_webqsp.txt'), bert_name, ent2id, rel2id, batch_size, training=True)
-        test_data = DataLoader(input_dir, os.path.join(input_dir, 'QA_data/WebQuestionsSP/qa_test_webqsp.txt'), bert_name, ent2id, rel2id, batch_size)
+        train_data = DataLoader(input_dir, os.path.join(input_dir, 'qa_train_webqsp.txt'), bert_name, ent2id, rel2id, batch_size, training=True)
+        test_data = DataLoader(input_dir, os.path.join(input_dir, 'qa_test_webqsp.txt'), bert_name, ent2id, rel2id, batch_size)
     
         with open(cache_fn, 'wb') as fp:
             pickle.dump((ent2id, rel2id, triples, train_data, test_data), fp)
