@@ -64,7 +64,7 @@ def validate(args, model, data, device, verbose = False):
                     print('> prediction: {}'.format('; '.join([vocab['id2entity'][_] for _ in range(len(answers[i])) if e_score[i][_].item() > 0.9])))
                     embed()
         #medindo tempo total
-        total_time = total_end - total_start
+        total_time = total_time - total_start
         total_questions = count['all']
 
         print(f"Total inference time: {total_time:.4f}s")
