@@ -62,7 +62,7 @@ class GRU(nn.Module):
         sorted_seq_lengths, indices = torch.sort(length, descending=True)
         _, desorted_indices = torch.sort(indices, descending=False)
         input = input[indices]
-        packed_input = nn.utils.rnn.pack_padded_sequence(input, sorted_seq_lengths, batch_first=True)
+        packed_input = nn.utils.rnn.pack_padded_sequence(input, sorted_seq_lengths.cpu(), batch_first=True)
         if h_0 is None:
             hidden, h_n = self.encoder(packed_input) 
         else:
@@ -106,7 +106,7 @@ class BiGRU(nn.Module):
         sorted_seq_lengths, indices = torch.sort(length, descending=True)
         _, desorted_indices = torch.sort(indices, descending=False)
         input = input[indices]
-        packed_input = nn.utils.rnn.pack_padded_sequence(input, sorted_seq_lengths, batch_first=True)
+        packed_input = nn.utils.rnn.pack_padded_sequence(input, sorted_seq_lengths.cpu(), batch_first=True)
         hidden, h_n = self.encoder(packed_input) 
         # h_n is (num_layers * num_directions, bsz, h_dim//2)
         hidden = nn.utils.rnn.pad_packed_sequence(hidden, batch_first=True, total_length=max_len)[0] # (bsz, max_len, h_dim)
