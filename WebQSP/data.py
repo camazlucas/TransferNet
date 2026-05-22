@@ -117,18 +117,18 @@ def load_data(input_dir, bert_name, batch_size):
     else:
         print('Read data...')
         ent2id = {}
-        for line in open(os.path.join(input_dir, 'entity_ids_full.dict')):
+        for line in open(os.path.join(input_dir, 'entities.dict')):
             l = line.strip().split('\t')
             ent2id[l[0].strip()] = len(ent2id)
         # print(len(ent2id))
         # print(max(ent2id.values()))
         rel2id = {}
-        for line in open(os.path.join(input_dir, 'relations_ids_full.dict')):
+        for line in open(os.path.join(input_dir, 'relations.dict')):
             l = line.strip().split('\t')
             rel2id[l[0].strip()] = int(l[1])
 
         triples = []
-        for line in open(os.path.join(input_dir, 'FB_full.txt')):
+        for line in open(os.path.join(input_dir, 'FB.txt')):
             l = line.strip().split('\t')
             s = ent2id[l[0].strip()]
             p = rel2id[l[1].strip()]
