@@ -52,7 +52,7 @@ class DataLoader(torch.utils.data.DataLoader):
 
         sub_map = defaultdict(list)
         so_map = defaultdict(list)
-        for line in open(os.path.join(input_dir, 'FB_full.txt')):
+        for line in open(os.path.join(input_dir, 'FB.txt')):
             l = line.strip().split('\t')
             s = l[0].strip()
             p = l[1].strip()
