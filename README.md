@@ -114,6 +114,8 @@ WebQSP does not need preprocess. We can directly start the training:
 ```shell
 python -m WebQSP.train --input_dir <PATH/TO/UNZIPPED/DATA> --save_dir <PATH/TO/CHECKPOINT>
 
+python -m WebQSP.train --input_dir "../../Dataset/WebQSP/TransferNETDataset" --save_dir "../../Dataset/WebQSP/TransferNETDataset"
+
 entities.dict / relations.dict / FB.txt
 ```
 

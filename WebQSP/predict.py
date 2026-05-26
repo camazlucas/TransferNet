@@ -76,7 +76,11 @@ def main():
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    ent2id, rel2id, triples, train_loader, val_loader = load_data(args.input_dir, 16)
+    ent2id, rel2id, triples, train_loader, val_loader = load_data(
+    args.input_dir,
+    'bert-base-uncased',
+    16
+    )
 
     model = TransferNet(args, ent2id, rel2id, triples)
     missing, unexpected = model.load_state_dict(torch.load(args.ckpt), strict=False)
