@@ -73,6 +73,7 @@ def main():
     parser.add_argument('--input_dir', default = './input')
     parser.add_argument('--ckpt', required = True)
     parser.add_argument('--mode', default='val', choices=['val', 'vis', 'test'])
+    parser.add_argument('--bert_name', default='bert-base-uncased')
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
