@@ -92,22 +92,27 @@ class TransferNet(nn.Module):
                         sub, rel, obj = triples[b][:,0], triples[b][:,1], triples[b][:,2]
 
                         triple_candidates = []
+################################################ Ajuste do Limiar
+                        active_entities = last_e[b] > 0.1
 
                         for tri_idx in range(len(sub)):
 
+
+                            s = sub[tri_idx].item()
                             r = rel[tri_idx].item()
-
-                            if r in rel_candidates:
-
-                                s = sub[tri_idx].item()
-                                o = obj[tri_idx].item()
+                            o = obj[tri_idx].item()
                             
-                            triple_candidates.append({
-                                'head': self.id2ent[s],
-                                'relation': self.id2rel[r],
-                                'tail': self.id2ent[o],
-                                'score': float(rel_dist[b][r].item())
-                            })
+                            if active_entities[s] and r in rel_candidates:
+
+                                triple_candidates.append({
+                                    'head': self.id2ent[s],
+                                    'relation': self.id2rel[r],
+                                    'tail': self.id2ent[o],
+                                    'score': float(
+                                        last_e[b][s].item() *
+                                        rel_dist[b][r].item()
+                                    )
+                                })
                         
                         triple_candidates = sorted(
                             triple_candidates,
@@ -120,7 +125,7 @@ class TransferNet(nn.Module):
                             'triples': triple_candidates
                         })
 
-                    way_paths.append(step_paths)
+                    way_paths.extend(step_paths)
 
                 new_e = []
                 for b in range(bsz):

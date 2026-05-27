@@ -7,6 +7,7 @@ from collections import defaultdict
 from utils.misc import batch_device
 from .data import load_data
 from .model import TransferNet
+import json
 
 from IPython import embed
 
@@ -17,8 +18,30 @@ def validate(args, model, data, device, verbose = False):
     correct = 0
     hop_count = defaultdict(list)
     with torch.no_grad():
+        results = []
         for batch in tqdm(data, total=len(data)):
-            outputs = model(*batch_device(batch, device)) # [bsz, Esize]
+            outputs = model(*batch_device(batch, device), return_paths=True) # [bsz, Esize]
+            question_ids = batch[1]['input_ids']
+            batch_questions = []
+
+            for i in range (len(question_ids)):
+
+                tokens = data.tokenizer.convert_ids_to_tokens(
+                    question_ids[i].tolist()
+                )
+
+                question = data.tokenizer.convert_tokens_to_string(tokens)
+
+                batch_question.append(question)
+                
+            
+            result = {
+                'questions': batch_questions,
+                'paths': outputs['paths']
+            }
+
+            results.append(result)
+        
             e_score = outputs['e_score'].cpu()
             scores, idx = torch.max(e_score, dim = 1) # [bsz], [bsz]
             match_score = torch.gather(batch[2], 1, idx.unsqueeze(-1)).squeeze().tolist()
@@ -64,6 +87,15 @@ def validate(args, model, data, device, verbose = False):
     #     sum(hop_count[1])/(len(hop_count[1])+0.1),
     #     len(hop_count[1]),
     #     ))
+    output_path = os.path.join(
+        args.input_dir,
+        'predicted_paths.jsonl'
+    )
+    with open(output_path, 'w', encoding='utf-8') as f:
+
+        for item in results:
+            f.write(json.dumps(item) + '\n')
+
     return acc
 
 
