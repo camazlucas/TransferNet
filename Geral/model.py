@@ -9,7 +9,8 @@ class TransferNet(nn.Module):
         super().__init__()
         num_relations = len(rel2id)
         self.num_ents = len(ent2id)
-        self.id2rel = {v:k for k,v in rel2id.item()}
+        self.id2ent = {v:k for k,v in ent2id.items()}
+        self.id2rel = {v:k for k,v in rel2id.items()}
         self.num_steps = args.num_steps
         self.num_ways = args.num_ways
 
@@ -78,29 +79,48 @@ class TransferNet(nn.Module):
                 rel_logit = self.rel_classifiers['way_{}'.format(w)](ctx_h) # [bsz, num_relations]
                 # rel_dist = torch.softmax(rel_logit, 1) # bad
                 rel_dist = torch.sigmoid(rel_logit)
+################################### TopK relacoes                
                 topk_scores, topk_rel = torch.topk(rel_dist, k=5, dim=1)
                 rel_probs.append(rel_dist)
                 if return_paths:
-                    step_info = []
+                    step_paths = []
 
                     for b in range(bsz):
 
-                        rels = topk_rel[b].detach().cpu().tolist()
-                        scores = topk_scores[b].detach().cpu().tolist()
+                        rel_candidates = topk_rel[b].detach().cpu().tolist()
+                        
+                        sub, rel, obj = triples[b][:,0], triples[b][:,1], triples[b][:,2]
 
-                        rel_names = [
-                            self.id2rel[r] if hasattr(self, 'id2rel') else r
-                            for r in rels
-                        ]
+                        triple_candidates = []
 
-                        step_info.append({
+                        for tri_idx in range(len(sub)):
+
+                            r = rel[tri_idx].item()
+
+                            if r in rel_candidates:
+
+                                s = sub[tri_idx].item()
+                                o = obj[tri_idx].item()
+                            
+                            triple_candidates.append({
+                                'head': self.id2ent[s],
+                                'relation': self.id2rel[r],
+                                'tail': self.id2ent[o],
+                                'score': float(rel_dist[b][r].item())
+                            })
+                        
+                        triple_candidates = sorted(
+                            triple_candidates,
+                            key = lambda x:x['score'],
+                            reverse=True
+                        )[:5]
+                        
+                        step_paths.append({
                             'step': t,
-                            'relations': rel_names,
-                            'relation_ids': rels,
-                            'relation_scores': scores
+                            'triples': triple_candidates
                         })
 
-                    way_paths.append(step_info)
+                    way_paths.append(step_paths)
 
                 new_e = []
                 for b in range(bsz):
@@ -125,7 +145,10 @@ class TransferNet(nn.Module):
             last_e = torch.sum(hop_res * hop_attn, dim=1) # [bsz, num_ent]
 
             if return_paths:
-                all_paths.append(way_paths)
+                all_paths.append({
+                    'way': w,
+                    'steps': way_paths
+                })
 
             e_score.append(last_e)
 
