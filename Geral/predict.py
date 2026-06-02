@@ -32,7 +32,7 @@ def validate(args, model, data, device, verbose = False):
 
                 question = data.tokenizer.convert_tokens_to_string(tokens)
 
-                batch_question.append(question)
+                batch_questions.append(question)
                 
             
             result = {
@@ -118,9 +118,9 @@ def main():
         print("Unexpected keys: {}".format("; ".join(unexpected)))
     model = model.to(device)
     # model.triples = model.triples.to(device)
-    model.Msubj = model.Msubj.to(device)
-    model.Mobj = model.Mobj.to(device)
-    model.Mrel = model.Mrel.to(device)
+    # model.Msubj = model.Msubj.to(device)
+    # model.Mobj = model.Mobj.to(device)
+    # model.Mrel = model.Mrel.to(device)
 
     if args.mode == 'vis':
         validate(args, model, val_loader, device, True)
