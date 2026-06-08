@@ -75,7 +75,7 @@ class DataLoader(torch.utils.data.DataLoader):
             question_2 = question[1].split(']')
             head = question_2[0].strip()
             question_2 = question_2[1]
-            # question = question_1 + 'NE' + question_2
+            question = (question_1 + ' NE ' + question_2).strip()
             question = question_1.strip()
             ans = line[1].split('|')
 
@@ -138,8 +138,8 @@ def load_data(input_dir, bert_name, batch_size):
             triples.append((o, p_rev, s))
         triples = torch.LongTensor(triples)
 
-        train_data = DataLoader(input_dir, os.path.join(input_dir, '3-hop/qa_train_metaqa_3hop.txt'), bert_name, ent2id, rel2id, batch_size, training=True)
-        test_data = DataLoader(input_dir, os.path.join(input_dir, '3-hop/qa_test_metaqa_3hop.txt'), bert_name, ent2id, rel2id, batch_size)
+        train_data = DataLoader(input_dir, os.path.join(input_dir, '1-hop/qa_train_metaqa_1hop.txt'), bert_name, ent2id, rel2id, batch_size, training=True)
+        test_data = DataLoader(input_dir, os.path.join(input_dir, '1-hop/qa_test_metaqa_1hop.txt'), bert_name, ent2id, rel2id, batch_size)
     
         with open(cache_fn, 'wb') as fp:
             pickle.dump((ent2id, rel2id, triples, train_data, test_data), fp)
