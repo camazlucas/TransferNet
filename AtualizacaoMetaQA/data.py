@@ -75,8 +75,9 @@ class DataLoader(torch.utils.data.DataLoader):
             question_2 = question[1].split(']')
             head = question_2[0].strip()
             question_2 = question_2[1]
+
             question = (question_1 + ' NE ' + question_2).strip()
-            question = question_1.strip()
+
             ans = line[1].split('|')
 
 

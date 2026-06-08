@@ -58,12 +58,21 @@ def validate(args, model, data, device, verbose = False):
                         embed()
     acc = correct / count
     print(acc)
-    print('pred hop accuracy: 1-hop {} (total {}), 2-hop {} (total {})'.format(
-        sum(hop_count[0])/(len(hop_count[0])+0.1),
-        len(hop_count[0]),
-        sum(hop_count[1])/(len(hop_count[1])+0.1),
-        len(hop_count[1]),
-        ))
+    # print('pred hop accuracy: 1-hop {} (total {}), 2-hop {} (total {})'.format(
+    #     sum(hop_count[0])/(len(hop_count[0])+0.1),
+    #     len(hop_count[0]),
+    #     sum(hop_count[1])/(len(hop_count[1])+0.1),
+    #     len(hop_count[1]),
+    #     ))
+    for hop in sorted(hop_count.keys()):
+
+        acc = sum(hop_count[hop]) / (len(hop_count[hop]) + 0.1)
+
+        print(
+            f"{hop+1}-hop accuracy: "
+            f"{acc:.4f} "
+            f"(total {len(hop_count[hop])})"
+        )
     return acc
 
 
