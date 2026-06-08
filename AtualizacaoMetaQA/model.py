@@ -8,7 +8,7 @@ class TransferNet(nn.Module):
     def __init__(self, args, ent2id, rel2id, triples):
         super().__init__()
         self.args = args
-        self.num_steps = 3
+        self.num_steps = 1
         num_relations = len(rel2id)
         # self.triples = triples
 
