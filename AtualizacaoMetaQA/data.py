@@ -78,10 +78,6 @@ class DataLoader(torch.utils.data.DataLoader):
 
             question = (question_1 + ' NE ' + question_2).strip()
 
-            ######################### DEBUG 
-            print(question)
-            ###############################
-
             ans = line[1].split('|')
 
 
