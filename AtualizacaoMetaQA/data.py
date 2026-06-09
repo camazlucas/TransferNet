@@ -78,6 +78,10 @@ class DataLoader(torch.utils.data.DataLoader):
 
             question = (question_1 + ' NE ' + question_2).strip()
 
+            ######################### DEBUG 
+            print(question)
+            ###############################
+
             ans = line[1].split('|')
 
 
@@ -109,7 +113,7 @@ class DataLoader(torch.utils.data.DataLoader):
 
 
 def load_data(input_dir, bert_name, batch_size):
-    cache_fn = os.path.join(input_dir, 'processed.pt')
+    cache_fn = os.path.join(input_dir, 'processed_2hop.pt')
     if os.path.exists(cache_fn):
         print('Read from cache file: {} (NOTE: delete it if you modified data loading process)'.format(cache_fn))
         with open(cache_fn, 'rb') as fp:

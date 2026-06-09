@@ -22,6 +22,15 @@ torch.set_num_threads(1) # avoid using multiple cpus
 
 
 def train(args):
+
+    ######################### DEBUG
+    print(batch[1]["input_ids"][0])
+    print(train_loader.tokenizer.decode(
+        batch[1]["input_ids"][0],
+        skip_special_tokens=True
+    ))
+    ###############################
+    
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     ent2id, rel2id, triples, train_loader, val_loader = load_data(args.input_dir, args.bert_name, args.batch_size)
