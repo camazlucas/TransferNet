@@ -74,12 +74,6 @@ def train(args):
             iteration = iteration + 1
             loss = model(*batch_device(batch, device))
 
-            ############################### DEBUG
-            print(loss)
-
-            raise systemexit
-            ######################################
-
             optimizer.zero_grad()
             if isinstance(loss, dict):
                 if len(loss) > 1:
