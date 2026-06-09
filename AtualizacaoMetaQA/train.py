@@ -26,21 +26,6 @@ def train(args):
 
     ent2id, rel2id, triples, train_loader, val_loader = load_data(args.input_dir, args.bert_name, args.batch_size)
 
-    ######################### DEBUG
-    batch = next(iter(train_loader))
-
-    print(batch[1]["input_ids"][0])
-
-    print(
-        train_loader.tokenizer.decode(
-            batch[1]["input_ids"][0],
-            skip_special_tokens=True
-        )
-    )
-
-    return
-    ######################################
-
     logging.info("Create model.........")
     model = TransferNet(args, ent2id, rel2id, triples)
     if not args.ckpt == None:
@@ -88,6 +73,13 @@ def train(args):
         for iteration, batch in enumerate(train_loader):
             iteration = iteration + 1
             loss = model(*batch_device(batch, device))
+
+            ############################### DEBUG
+            print(loss)
+
+            raise systemexit
+            ######################################
+
             optimizer.zero_grad()
             if isinstance(loss, dict):
                 if len(loss) > 1:
