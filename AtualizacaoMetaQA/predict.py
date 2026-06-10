@@ -12,18 +12,10 @@ from IPython import embed
 
 
 def validate(args, model, data, device, verbose = False):
-    ############################## DEBUG
-    print("\n====================")
-    print("VALIDATE INICIADO")
-    print("====================\n")
-    ####################################
     model.eval()
     count = 0
     correct = 0
     hop_count = defaultdict(list)
-    ############################# Alteração do relatorio
-    hop_selected = defaultdict(int)
-    ####################################################
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
             outputs = model(*batch_device(batch, device)) # [bsz, Esize]
@@ -34,11 +26,6 @@ def validate(args, model, data, device, verbose = False):
             correct += sum(match_score)
             for i in range(len(match_score)):
                 h = outputs['hop_attn'][i].argmax().item()
-
-                ###################################### Aleteração do relatorio
-                hop_selected[h] += 1
-                ##############################################################
-
                 hop_count[h].append(match_score[i])
 
             if verbose:
@@ -51,7 +38,7 @@ def validate(args, model, data, device, verbose = False):
                         print(' '.join(question_tokens))
                         topic_id = batch[0][i].argmax(0).item()
                         print('> topic entity: {}'.format(data.id2ent[topic_id]))
-                        for t in range(2):
+                        for t in range(model.num_steps):
                             print('>>>>>>> step {}'.format(t))
                             tmp = ' '.join(['{}: {:.3f}'.format(x, y) for x,y in 
                                 zip(question_tokens, outputs['word_attns'][t][i].tolist())])
@@ -80,34 +67,28 @@ def validate(args, model, data, device, verbose = False):
     # #     len(hop_count[1]),
     # #     ))
     # # ######################################################################
-    # for hop in sorted(hop_count.keys()):
 
-    #     acc = sum(hop_count[hop]) / (len(hop_count[hop]) + 0.1)
-
-    #     print(
-    #         f"{hop+1}-hop accuracy: "
-    #         f"{acc:.4f} "
-    #         f"(total {len(hop_count[hop])})"
-    #     )
-    # return acc
-    # ################################################################
     overall_acc = correct / count
 
     print(f"Overall accuracy: {overall_acc:.4f}")
 
-    for hop in sorted(hop_selected.keys()):
+    hop_report = []
 
-        hop_acc = sum(hop_count[hop]) / (len(hop_count[hop]) + 0.1)
+    for hop in range(model.num_steps):
 
-        print(
-            f"Hop {hop+1}: "
-            f"selected {hop_selected[hop]} times | "
-            f"accuracy {hop_acc:.4f}"
+        hop_acc = (
+            sum(hop_count[hop]) /
+            (len(hop_count[hop]) + 0.1)
         )
 
-    ######################################## DEBUG
-    print("hop_count =", dict((k, len(v)) for k, v in hop_count.items()))
-    ##############################################
+        hop_report.append(
+            f"{hop+1}-hop: {hop_acc:.4f}"
+        )
+
+    print(
+        "Pred hop accuracy: "
+        + ", ".join(hop_report)
+    )
 
     return overall_acc
 
