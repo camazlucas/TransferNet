@@ -95,7 +95,22 @@ class TransferNet(nn.Module):
                 'hop_attn': hop_attn.squeeze(2)
             }
         else:
+            ################################ DEBUG #########################
+            # weight = answers * 99 + 1
+            # loss = torch.sum(entity_range * weight * torch.pow(last_e - answers, 2)) / torch.sum(entity_range * weight)
+            
             weight = answers * 99 + 1
-            loss = torch.sum(entity_range * weight * torch.pow(last_e - answers, 2)) / torch.sum(entity_range * weight)
+
+            den = torch.sum(entity_range * weight)
+
+            if den == 0:
+                print("DENOMINADOR ZERO")
+                raise SystemExit
+
+            loss = torch.sum(
+                entity_range * weight * torch.pow(last_e - answers, 2)
+            ) / den
+            ###############################################################
+
 
             return {'loss': loss}
