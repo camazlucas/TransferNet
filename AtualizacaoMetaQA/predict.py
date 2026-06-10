@@ -16,6 +16,9 @@ def validate(args, model, data, device, verbose = False):
     count = 0
     correct = 0
     hop_count = defaultdict(list)
+    ############################# Alteração do relatorio
+    hop_selected = defaultdict(int)
+    ####################################################
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
             outputs = model(*batch_device(batch, device)) # [bsz, Esize]
@@ -26,6 +29,11 @@ def validate(args, model, data, device, verbose = False):
             correct += sum(match_score)
             for i in range(len(match_score)):
                 h = outputs['hop_attn'][i].argmax().item()
+
+                ###################################### Aleteração do relatorio
+                hop_selected[h] += 1
+                ##############################################################
+
                 hop_count[h].append(match_score[i])
 
             if verbose:
@@ -56,24 +64,43 @@ def validate(args, model, data, device, verbose = False):
                         print(' '.join(question_tokens))
                         print(outputs['hop_attn'][i].tolist())
                         embed()
-    acc = correct / count
-    print(acc)
-    # print('pred hop accuracy: 1-hop {} (total {}), 2-hop {} (total {})'.format(
-    #     sum(hop_count[0])/(len(hop_count[0])+0.1),
-    #     len(hop_count[0]),
-    #     sum(hop_count[1])/(len(hop_count[1])+0.1),
-    #     len(hop_count[1]),
-    #     ))
-    for hop in sorted(hop_count.keys()):
+    # ############################################ Ajuste do relatorio
+    # acc = correct / count
+    # print(acc)
+    # # ######################################################### Bloco Antigo
+    # # print('pred hop accuracy: 1-hop {} (total {}), 2-hop {} (total {})'.format(
+    # #     sum(hop_count[0])/(len(hop_count[0])+0.1),
+    # #     len(hop_count[0]),
+    # #     sum(hop_count[1])/(len(hop_count[1])+0.1),
+    # #     len(hop_count[1]),
+    # #     ))
+    # # ######################################################################
+    # for hop in sorted(hop_count.keys()):
 
-        acc = sum(hop_count[hop]) / (len(hop_count[hop]) + 0.1)
+    #     acc = sum(hop_count[hop]) / (len(hop_count[hop]) + 0.1)
+
+    #     print(
+    #         f"{hop+1}-hop accuracy: "
+    #         f"{acc:.4f} "
+    #         f"(total {len(hop_count[hop])})"
+    #     )
+    # return acc
+    # ################################################################
+    overall_acc = correct / count
+
+    print(f"Overall accuracy: {overall_acc:.4f}")
+
+    for hop in sorted(hop_selected.keys()):
+
+        hop_acc = sum(hop_count[hop]) / (len(hop_count[hop]) + 0.1)
 
         print(
-            f"{hop+1}-hop accuracy: "
-            f"{acc:.4f} "
-            f"(total {len(hop_count[hop])})"
+            f"Hop {hop+1}: "
+            f"selected {hop_selected[hop]} times | "
+            f"accuracy {hop_acc:.4f}"
         )
-    return acc
+
+    return overall_acc
 
 
 def main():
