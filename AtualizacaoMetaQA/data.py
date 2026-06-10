@@ -112,7 +112,7 @@ class DataLoader(torch.utils.data.DataLoader):
 
 
 def load_data(input_dir, bert_name, batch_size):
-    cache_fn = os.path.join(input_dir, 'processed_1hop.pt')
+    cache_fn = os.path.join(input_dir, 'processed_3hop.pt')
     if os.path.exists(cache_fn):
         print('Read from cache file: {} (NOTE: delete it if you modified data loading process)'.format(cache_fn))
         with open(cache_fn, 'rb') as fp:
