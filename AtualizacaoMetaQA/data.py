@@ -58,6 +58,8 @@ class DataLoader(torch.utils.data.DataLoader):
             p = l[1].strip()
             o = l[2].strip()
             sub_map[s].append((p, o))
+            sub_map[o].append((p + '_reverse', s))
+            
             so_map[(s, o)].append(p)
 
 
@@ -89,14 +91,6 @@ class DataLoader(torch.utils.data.DataLoader):
                 entity_range.add(o)
                 for p2, o2 in sub_map[o]:
                     entity_range.add(o2)
-
-            ################################# DEBUG 2 ####################
-            if len(entity_range) == 0:
-                print("ENTITY_RANGE VAZIO")
-                print("head =", head)
-                print("linha =", line)
-                raise SystemExit
-            ##############################################################
 
             entity_range = [ent2id[o] for o in entity_range]
 
