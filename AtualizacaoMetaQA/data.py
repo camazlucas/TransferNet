@@ -89,6 +89,15 @@ class DataLoader(torch.utils.data.DataLoader):
                 entity_range.add(o)
                 for p2, o2 in sub_map[o]:
                     entity_range.add(o2)
+
+            ################################# DEBUG 2 ####################
+            if len(entity_range) == 0:
+                print("ENTITY_RANGE VAZIO")
+                print("head =", head)
+                print("linha =", line)
+                raise SystemExit
+            ##############################################################
+
             entity_range = [ent2id[o] for o in entity_range]
 
             head = [ent2id[head]]
