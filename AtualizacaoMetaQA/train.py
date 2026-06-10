@@ -106,7 +106,7 @@ def train(args):
                         lr=optimizer.param_groups[0]["lr"],
                     )
                 )
-        if (epoch+1)%1 == 0:
+        if (epoch+1)%5 == 0:
             acc = validate(args, model, val_loader, device)
             logging.info(acc)
             torch.save(model.state_dict(), os.path.join(args.save_dir, 'model-{}-{:.4f}.pt'.format(epoch, acc)))
