@@ -12,6 +12,11 @@ from IPython import embed
 
 
 def validate(args, model, data, device, verbose = False):
+    ############################## DEBUG
+    print("\n====================")
+    print("VALIDATE INICIADO")
+    print("====================\n")
+    ####################################
     model.eval()
     count = 0
     correct = 0
@@ -99,6 +104,10 @@ def validate(args, model, data, device, verbose = False):
             f"selected {hop_selected[hop]} times | "
             f"accuracy {hop_acc:.4f}"
         )
+
+    ######################################## DEBUG
+    print("hop_count =", dict((k, len(v)) for k, v in hop_count.items()))
+    ##############################################
 
     return overall_acc
 
