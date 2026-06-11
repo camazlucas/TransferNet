@@ -112,7 +112,7 @@ class DataLoader(torch.utils.data.DataLoader):
 
 
 def load_data(input_dir, bert_name, batch_size):
-    cache_fn = os.path.join(input_dir, 'processed_3hop.pt')
+    cache_fn = os.path.join(input_dir, 'processed_1hop.pt')
     if os.path.exists(cache_fn):
         print('Read from cache file: {} (NOTE: delete it if you modified data loading process)'.format(cache_fn))
         with open(cache_fn, 'rb') as fp:
@@ -142,8 +142,8 @@ def load_data(input_dir, bert_name, batch_size):
             triples.append((o, p_rev, s))
         triples = torch.LongTensor(triples)
 
-        train_data = DataLoader(input_dir, os.path.join(input_dir, '3-hop/qa_train_metaqa_3hop.txt'), bert_name, ent2id, rel2id, batch_size, training=True)
-        test_data = DataLoader(input_dir, os.path.join(input_dir, '3-hop/qa_valid_metaqa_3hop.txt'), bert_name, ent2id, rel2id, batch_size)
+        train_data = DataLoader(input_dir, os.path.join(input_dir, '1-hop/qa_train_metaqa_1hop.txt'), bert_name, ent2id, rel2id, batch_size, training=True)
+        test_data = DataLoader(input_dir, os.path.join(input_dir, '1-hop/qa_test_metaqa_1hop.txt'), bert_name, ent2id, rel2id, batch_size)
     
         with open(cache_fn, 'wb') as fp:
             pickle.dump((ent2id, rel2id, triples, train_data, test_data), fp)
