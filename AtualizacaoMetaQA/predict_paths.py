@@ -162,7 +162,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
     )
 
     with open(
-            "predicted_paths.json",
+            "predicted_paths_3hop.json",
             "w",
             encoding="utf-8"
         ) as f:
