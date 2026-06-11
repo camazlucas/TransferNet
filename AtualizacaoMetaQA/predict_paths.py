@@ -87,6 +87,10 @@ def validate(args, model, data, device, kg_index, verbose = False):
                     })
 
                 results.append(item)
+
+                if len(results) > 0:
+                    print(json.dumps(results[0], indent=2, ensure_ascii=False))
+                    return
             
             ######################################################
 
@@ -127,26 +131,48 @@ def validate(args, model, data, device, kg_index, verbose = False):
                         print(' '.join(question_tokens))
                         print(outputs['hop_attn'][i].tolist())
                         embed()
-    acc = correct / count
-    print(acc)
-    print('pred hop accuracy: 1-hop {} (total {}), 2-hop {} (total {})'.format(
-        sum(hop_count[0])/(len(hop_count[0])+0.1),
-        len(hop_count[0]),
-        sum(hop_count[1])/(len(hop_count[1])+0.1),
-        len(hop_count[1]),
-        ))
+    # acc = correct / count
+    # print(acc)
+    # print('pred hop accuracy: 1-hop {} (total {}), 2-hop {} (total {})'.format(
+    #     sum(hop_count[0])/(len(hop_count[0])+0.1),
+    #     len(hop_count[0]),
+    #     sum(hop_count[1])/(len(hop_count[1])+0.1),
+    #     len(hop_count[1]),
+    #     ))
+    overall_acc = correct / count
+
+    print(f"Overall accuracy: {overall_acc:.4f}")
+
+    hop_report = []
+
+    for hop in range(model.num_steps):
+
+        hop_acc = (
+            sum(hop_count[hop]) /
+            (len(hop_count[hop]) + 0.1)
+        )
+
+        hop_report.append(
+            f"{hop+1}-hop: {hop_acc:.4f}"
+        )
+
+    print(
+        "Pred hop accuracy: "
+        + ", ".join(hop_report)
+    )
+
     with open(
             "predicted_paths.json",
             "w",
             encoding="utf-8"
         ) as f:
 
-        ##################### DEBUG #################
+        # ##################### DEBUG #################
 
-        if results:
-            print(json.dumps(results[0], indent=2, ensure_ascii=False))
+        # if results:
+        #     print(json.dumps(results[0], indent=2, ensure_ascii=False))
 
-        #############################################
+        # #############################################
 
 
         json.dump(
