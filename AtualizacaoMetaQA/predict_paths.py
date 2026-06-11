@@ -29,10 +29,10 @@ def validate(args, model, data, device, kg_index, verbose = False):
             rel_probs = outputs["rel_probs"][0]
 
             
-            ########################### DEBUG #########################
-            print(outputs["rel_probs"][0].shape)
-            embed()
-            ###########################################################
+            # ########################### DEBUG #########################
+            # print(outputs["rel_probs"][0].shape)
+            # embed()
+            # ###########################################################
 
             top_scores, top_rel_ids = torch.topk(
                 rel_probs,
@@ -90,7 +90,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                 if len(results) > 0:
                     print(json.dumps(results[0], indent=2, ensure_ascii=False))
-                    return
+                    # return
             
             ######################################################
 
