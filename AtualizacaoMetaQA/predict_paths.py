@@ -106,12 +106,21 @@ def validate(args, model, data, device, kg_index, verbose = False):
                     reverse=True
                 )
 
+                clean_paths = []
+
+                for path in current_paths[:10]:
+
+                    clean_paths.append({
+                        "triples": path["triples"],
+                        "score": path["score"]
+                    })
+
                 results.append({
                     "question": question,
-                    # "head_entity": data.id2ent[head_id],
-                    "top_paths": current_paths[:10]
+                    "head_entity": data.id2ent[head_id],
+                    "top_paths": clean_paths
                 })
-            
+
             ######################################################
 
             e_score = outputs['e_score'].cpu()
@@ -175,7 +184,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
     )
 
     with open(
-            "predicted_paths_3hop.json",
+            "predicted_paths_2hop.json",
             "w",
             encoding="utf-8"
         ) as f:
