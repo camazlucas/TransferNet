@@ -108,7 +108,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                 results.append({
                     "question": question,
-                    "head_entity": data.id2ent[head_id],
+                    # "head_entity": data.id2ent[head_id],
                     "top_paths": current_paths[:10]
                 })
             
@@ -181,16 +181,16 @@ def validate(args, model, data, device, kg_index, verbose = False):
         ) as f:
 
         ################################ DEBUG ############################
-        if results:
-            print(
-                json.dumps(
-                    results[0],
-                    indent=2,
-                    ensure_ascii=False
-                )
-            )
+        # if results:
+        #     print(
+        #         json.dumps(
+        #             results[0],
+        #             indent=2,
+        #             ensure_ascii=False
+        #         )
+        #     )
 
-            return overall_acc
+        #     return overall_acc
         ##################################################################
 
         json.dump(
