@@ -99,33 +99,31 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                         new_paths = new_paths[:100]
 
-                    ##################################### DEBUG ######################################
-                    # if len(new_paths) == 0:
-                    #     break
+                    ######################## DEBUG ################################
+
+                    for rel_id in selected_rel_ids:
+                        print(
+                            data.id2rel[rel_id],
+                            float(rel_probs[rel_id])
+                        )
+
+                    top_scores, top_rel_ids = torch.topk(
+                        rel_probs,
+                        k=10
+                    )
+
+                    print("\nTOP 10:")
+
+                    for score, rel_id in zip(top_scores, top_rel_ids):
+                        print(
+                            data.id2rel[rel_id.item()],
+                            float(score)
+                        )
+                    
+                    #############################################################
+
                     if len(new_paths) == 0:
-
-                        print("\n======================")
-                        print(question)
-                        print(f"HOP {hop+1}")
-
-                        for path in current_paths:
-
-                            print(
-                                "ENTITY:",
-                                data.id2ent[path["entity"]]
-                            )
-
-                        print("RELATIONS:")
-
-                        for rel_id in selected_rel_ids:
-
-                            print(
-                                data.id2rel[rel_id],
-                                float(rel_probs[rel_id])
-                            )
-
                         break
-                    ############################################################################
 
                     current_paths = new_paths
 
