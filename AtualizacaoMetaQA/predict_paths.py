@@ -48,7 +48,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
                     rel_probs = outputs["rel_probs"][hop][i]
 
                     selected_rel_ids = (
-                        rel_probs > 0.9
+                        rel_probs > 0.8
                     ).nonzero().squeeze(1).tolist()
 
                     if len(selected_rel_ids) == 0:
