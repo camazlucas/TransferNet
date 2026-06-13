@@ -22,26 +22,9 @@ def validate(args, model, data, device, kg_index, verbose = False):
     results = []
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
-            outputs = model(*batch_device(batch, device)) # [bsz, Esize]
+            outputs = model(*batch_device(batch, device)) # [bsz, Esize
 
-            ########################## Extracao das Probabilidades
-            
-            rel_probs = outputs["rel_probs"][0]
-
-            
-            # ########################### DEBUG #########################
-            # print(outputs["rel_probs"][0].shape)
-            # embed()
-            # ###########################################################
-
-            top_scores, top_rel_ids = torch.topk(
-                rel_probs,
-                k=3,
-                dim=1
-            )
-
-            for i in range(len(top_rel_ids)):
-
+            for i in range(len(batch[0])):
                 question_ids = batch[1]["input_ids"][i].tolist()
 
                 question = data.tokenizer.decode(
@@ -51,46 +34,83 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                 head_id = batch[0][i].argmax().item()
 
-                item = {
+                current_paths = [
+                    {
+                        "entity": head_id,
+                        "triples": [],
+                        "score": 1.0
+                    }
+                ]
+
+                for hop in range(len(outputs["rel_probs"])):
+
+                    rel_probs = outputs["rel_probs"][hop][i]
+
+                    selected_rel_ids = (
+                        rel_probs > 0.9
+                    ).nonzero().squeeze(1).tolist()
+
+                    if len(selected_rel_ids) == 0:
+
+                        _, top_rel_ids = torch.topk(
+                            rel_probs,
+                            k=3
+                        )
+
+                        selected_rel_ids = top_rel_ids.tolist()
+
+                    new_paths = []
+
+                    for path in current_paths:
+
+                        for rel_id in selected_rel_ids:
+
+                            tails = kg_index.get(
+                                (path["entity"], rel_id),
+                                []
+                            )
+
+                            for tail_id in tails:
+
+                                new_path = {
+                                    "entity": tail_id,
+                                    "triples": path["triples"] + [[
+                                        data.id2ent[path["entity"]],
+                                        data.id2rel[rel_id],
+                                        data.id2ent[tail_id]
+                                    ]],
+                                    "score": (
+                                        path["score"]
+                                        * float(rel_probs[rel_id])
+                                    )
+                                }
+
+                                new_paths.append(new_path)
+
+                    if len(new_paths) > 100:
+
+                        new_paths.sort(
+                            key=lambda x: x["score"],
+                            reverse=True
+                        )
+
+                        new_paths = new_paths[:100]
+
+                    if len(new_paths) == 0:
+                        break
+
+                    current_paths = new_paths
+
+                current_paths.sort(
+                    key=lambda x: x["score"],
+                    reverse=True
+                )
+
+                results.append({
                     "question": question,
                     "head_entity": data.id2ent[head_id],
-                    "top_paths": []
-                }
-
-                for rank in range(3):
-
-                    rel_id = top_rel_ids[i][rank].item()
-
-                    rel_score = float(
-                        top_scores[i][rank].item()
-                    )
-
-                    tails = kg_index.get(
-                        (head_id, rel_id),
-                        []
-                    )
-
-                    triples_json = []
-
-                    for tail_id in tails:
-
-                        triples_json.append([
-                            data.id2ent[head_id],
-                            data.id2rel[rel_id],
-                            data.id2ent[tail_id]
-                        ])
-
-                    item["top_paths"].append({
-                        "rank": rank + 1,
-                        "path_score": rel_score,
-                        "triples": triples_json
-                    })
-
-                results.append(item)
-
-                if len(results) > 0:
-                    print(json.dumps(results[0], indent=2, ensure_ascii=False))
-                    # return
+                    "top_paths": current_paths[:10]
+                })
             
             ######################################################
 
@@ -113,7 +133,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
                         print(' '.join(question_tokens))
                         topic_id = batch[0][i].argmax(0).item()
                         print('> topic entity: {}'.format(data.id2ent[topic_id]))
-                        for t in range(2):
+                        for t in range(model.num_steps):
                             print('>>>>>>> step {}'.format(t))
                             tmp = ' '.join(['{}: {:.3f}'.format(x, y) for x,y in 
                                 zip(question_tokens, outputs['word_attns'][t][i].tolist())])
@@ -131,14 +151,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
                         print(' '.join(question_tokens))
                         print(outputs['hop_attn'][i].tolist())
                         embed()
-    # acc = correct / count
-    # print(acc)
-    # print('pred hop accuracy: 1-hop {} (total {}), 2-hop {} (total {})'.format(
-    #     sum(hop_count[0])/(len(hop_count[0])+0.1),
-    #     len(hop_count[0]),
-    #     sum(hop_count[1])/(len(hop_count[1])+0.1),
-    #     len(hop_count[1]),
-    #     ))
+   
     overall_acc = correct / count
 
     print(f"Overall accuracy: {overall_acc:.4f}")
@@ -167,13 +180,18 @@ def validate(args, model, data, device, kg_index, verbose = False):
             encoding="utf-8"
         ) as f:
 
-        # ##################### DEBUG #################
+        ################################ DEBUG ############################
+        if results:
+            print(
+                json.dumps(
+                    results[0],
+                    indent=2,
+                    ensure_ascii=False
+                )
+            )
 
-        # if results:
-        #     print(json.dumps(results[0], indent=2, ensure_ascii=False))
-
-        # #############################################
-
+            return overall_acc
+        ##################################################################
 
         json.dump(
             results,
@@ -182,7 +200,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
             indent=2
         )
 
-    return acc
+    return overall_acc
 
 
 def main():
