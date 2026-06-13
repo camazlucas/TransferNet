@@ -101,24 +101,30 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                     ######################## DEBUG ################################
 
-                    for rel_id in selected_rel_ids:
-                        print(
-                            data.id2rel[rel_id],
-                            float(rel_probs[rel_id])
-                        )
+                    print("\n======================")
+                    print("QUESTION:", question)
+                    print("HOP:", hop + 1)
+
+                    print("\nCURRENT ENTITIES:")
+                    for path in current_paths:
+                        print(data.id2ent[path["entity"]])
+
+                    print("\nTOP 10 RELATIONS:")
 
                     top_scores, top_rel_ids = torch.topk(
                         rel_probs,
                         k=10
                     )
 
-                    print("\nTOP 10:")
-
                     for score, rel_id in zip(top_scores, top_rel_ids):
                         print(
                             data.id2rel[rel_id.item()],
                             float(score)
                         )
+
+                    print("\nSELECTED RELATIONS:")
+                    for rel_id in selected_rel_ids:
+                        print(data.id2rel[rel_id])
                     
                     #############################################################
 
