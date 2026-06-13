@@ -20,6 +20,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
     correct = 0
     hop_count = defaultdict(list)
     results = []
+    MAX_TAILS_PER_REL = 3
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
             outputs = model(*batch_device(batch, device)) # [bsz, Esize
@@ -69,6 +70,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
                                 (path["entity"], rel_id),
                                 []
                             )
+
+                            tails = tails[:MAX_TAILS_PER_REL]
 
                             for tail_id in tails:
 
