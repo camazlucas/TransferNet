@@ -7,8 +7,6 @@ from collections import defaultdict
 from utils.misc import batch_device
 from .data import load_data
 from .model import TransferNet
-import time
-import numpy as np
 
 from collections import defaultdict
 import json
@@ -23,20 +21,11 @@ def validate(args, model, data, device, kg_index, verbose = False):
     hop_count = defaultdict(list)
     results = []
     MAX_TAILS_PER_REL = 3
-    candidate_hits = 0
-    candidate_recall_sum = 0.0
-    candidate_f1_sum = 0.0
-
-    question_times = []
-    total_start = time.time()
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
             outputs = model(*batch_device(batch, device)) # [bsz, Esize
 
             for i in range(len(batch[0])):
-                
-                q_start = time.time()
-
                 question_ids = batch[1]["input_ids"][i].tolist()
 
                 question = data.tokenizer.decode(
@@ -121,54 +110,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
                     reverse=True
                 )
 
-                candidate_answers = set()
-
-                for path in current_paths[:10]:
-                    candidate_answers.add(path["entity"])
-
-                gold_answers = set(
-                    batch[2][i]
-                    .gt(0.9)
-                    .nonzero()
-                    .squeeze(1)
-                    .tolist()
-                )
-
-                intersection = candidate_answers & gold_answers
-
-                # Candidate Hits
-                if len(intersection) > 0:
-                    candidate_hits += 1
-
-                # Recall
-                if len(gold_answers) > 0:
-                    recall = len(intersection) / len(gold_answers)
-                else:
-                    recall = 0.0
-
-                candidate_recall_sum += recall
-
-                # Precision
-                if len(candidate_answers) > 0:
-                    precision = len(intersection) / len(candidate_answers)
-                else:
-                    precision = 0.0
-
-                # F1
-                if precision + recall > 0:
-                    f1 = (
-                        2 * precision * recall
-                        / (precision + recall)
-                    )
-                else:
-                    f1 = 0.0
-
-                candidate_f1_sum += f1
-
-                question_times.append(
-                    time.time() - q_start
-                )
-
                 clean_paths = []
 
                 for path in current_paths[:10]:
@@ -226,34 +167,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
    
     overall_acc = correct / count
 
-    candidate_hits_rate = (
-        candidate_hits / count
-    )
-
-    candidate_recall = (
-        candidate_recall_sum / count
-    )
-
-    candidate_f1 = (
-        candidate_f1_sum / count
-    )
-
-    total_time = (
-        time.time() - total_start
-    )
-
-    print()
-    print(f"Perguntas: {count}")
-    print(f"Hits@1: {overall_acc:.4f}")
-    print(f"Candidate Hits: {candidate_hits_rate:.4f}")
-    print(f"Candidate Recall: {candidate_recall:.4f}")
-    print(f"F1: {candidate_f1:.4f}")
-    print(f"Tempo total: {total_time:.2f} s")
-    print(f"Tempo medio: {np.mean(question_times):.4f} s")
-    print(f"Tempo minimo: {np.min(question_times):.4f} s")
-    print(f"Tempo maximo: {np.max(question_times):.4f} s")
-    print(f"Desvio padrao: {np.std(question_times):.4f} s")
-    print()
+    print(f"Overall accuracy: {overall_acc:.4f}")
 
     hop_report = []
 
