@@ -146,8 +146,8 @@ def load_data(input_dir, bert_name, batch_size):
             triples.append((o, p_rev, s))
         triples = torch.LongTensor(triples)
 
-        train_data = DataLoader(input_dir, os.path.join(input_dir, 'All-hops/qa_train_metaqa.txt'), bert_name, ent2id, rel2id, batch_size, training=True)
-        test_data = DataLoader(input_dir, os.path.join(input_dir, 'All-hops/qa_valid_metaqa.txt'), bert_name, ent2id, rel2id, batch_size)
+        train_data = DataLoader(input_dir, os.path.join(input_dir, 'Dataset/MetaQA/1-hops/qa_train_metaqa.txt'), bert_name, ent2id, rel2id, batch_size, training=True)
+        test_data = DataLoader(input_dir, os.path.join(input_dir, 'Dataset/MetaQA/1-hops/qa_test_metaqa.txt'), bert_name, ent2id, rel2id, batch_size)
     
         with open(cache_fn, 'wb') as fp:
             pickle.dump((ent2id, rel2id, triples, train_data, test_data), fp)
