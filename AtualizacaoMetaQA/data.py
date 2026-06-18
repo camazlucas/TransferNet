@@ -93,8 +93,8 @@ class DataLoader(torch.utils.data.DataLoader):
                 for p2, o2 in sub_map[o]:
                     entity_range.add(o2)
 
-                    for p3, o3 in sub_map[o2]:
-                        entity_range.add(o3)
+                    # for p3, o3 in sub_map[o2]:
+                    #     entity_range.add(o3)
 
             entity_range = [ent2id[o] for o in entity_range]
 
