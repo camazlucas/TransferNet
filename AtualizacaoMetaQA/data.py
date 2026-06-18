@@ -131,17 +131,20 @@ def load_data(
     else:
         print('Read data...')
         ent2id = {}
+        print("Lendo entities.dict")
         for line in open(os.path.join(input_dir, 'entities.dict'), encoding = 'utf-8'):
             l = line.strip().split('\t')
             ent2id[l[0].strip()] = len(ent2id)
         # print(len(ent2id))
         # print(max(ent2id.values()))
         rel2id = {}
+        print("Lendo relations.dict")
         for line in open(os.path.join(input_dir, 'relations.dict'), encoding = 'utf-8'):
             l = line.strip().split('\t')
             rel2id[l[0].strip()] = int(l[1])
 
         triples = []
+        print("Lendo kb.tsv")
         for line in open(os.path.join(input_dir, 'kb.tsv'), encoding = 'utf-8'):
             l = line.strip().split('\t')
             s = ent2id[l[0].strip()]
@@ -151,6 +154,7 @@ def load_data(
             p_rev = rel2id[l[1].strip()+'_reverse']
             triples.append((o, p_rev, s))
         triples = torch.LongTensor(triples)
+        print("KB carregada")
 
         train_data = DataLoader(
             input_dir,
