@@ -137,3 +137,11 @@ python -m AtualizacaoMetaQA.predict_paths --input_dir Dataset/MetaQA --ckpt Data
 python -m AtualizacaoMetaQA.predict_paths --input_dir Dataset/MetaQA --ckpt Dataset/Treino/3-hop/model-19-0.8167.pt --mode val --fixed_hops 3 --num_steps 3 --train_file Dataset/MetaQA/3-hop/qa_train_metaqa_3hop.txt --test_file Dataset/MetaQA/3-hop/qa_test_metaqa_3hop.txt
 
 python -m AtualizacaoMetaQA.predict_paths --input_dir "../../Dataset/WebQSP/TransferNETDataset"  --ckpt     --mode val --train_file "../../Dataset/WebQSP/TransferNETDataset/qa_train_webqsp.txt" --test_file "../../Dataset/WebQSP/TransferNETDataset/qa_test_com_data.txt"
+
+### Treinamento do Modelo
+
+python -m AtualizacaoMetaQA.train --input_dir Dataset/MetaQA --save_dir Dataset/Treino/1-hop_fixo --num_steps 1 --train_file Dataset/MetaQA/1-hop/qa_train_metaqa_1hop.txt --test_file Dataset/MetaQA/1-hop/qa_valid_metaqa_1hop.txt --batch_size 32 
+
+python -m AtualizacaoMetaQA.train --input_dir Dataset/MetaQA --save_dir Dataset/Treino/2-hop_fixo --num_steps 2 --train_file Dataset/MetaQA/2-hop/qa_train_metaqa_2hop.txt --test_file Dataset/MetaQA/1-hop/qa_valid_metaqa_2hop.txt 
+
+python -m AtualizacaoMetaQA.train --input_dir Dataset/MetaQA --save_dir Dataset/Treino/3-hop_fixo --num_steps 3 --train_file Dataset/MetaQA/3-hop/qa_train_metaqa_3hop.txt --test_file Dataset/MetaQA/3-hop/qa_valid_metaqa_3hop.txt 
