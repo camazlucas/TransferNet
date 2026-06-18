@@ -63,8 +63,8 @@ class TransferNet(nn.Module):
             ctx_h = (q_dist.unsqueeze(1) @ q_word_h).squeeze(1) # [bsz, dim_h]
 
             rel_logit = self.rel_classifier(ctx_h) # [bsz, num_relations]
-            rel_dist = torch.softmax(rel_logit, 1) # bad
-            # rel_dist = torch.sigmoid(rel_logit)
+            # rel_dist = torch.softmax(rel_logit, 1) # bad for wbqsp
+            rel_dist = torch.sigmoid(rel_logit)
             rel_probs.append(rel_dist)
 
             # sub, rel, obj = self.triples[:,0], self.triples[:,1], self.triples[:,2]
