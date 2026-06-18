@@ -43,6 +43,7 @@ class DataLoader(torch.utils.data.DataLoader):
     def __init__(self, input_dir, fn, bert_name, ent2id, rel2id, batch_size, training=False):
         print('Reading questions from {}'.format(fn))
         self.tokenizer = AutoTokenizer.from_pretrained(bert_name)
+        print("Tokenizer carregado")
         self.ent2id = ent2id
         self.rel2id = rel2id
         self.id2ent = invert_dict(ent2id)
