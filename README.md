@@ -126,3 +126,14 @@ Similar to WebQSP, CWQ does not need preprocess. We can directly start the train
 ```shell
 python -m CompWebQ.train --input_dir <PATH/TO/UNZIPPED/DATA> --save_dir <PATH/TO/CHECKPOINT>
 ```
+
+
+### Args Parse do MetaQA e WQSP
+
+python -m AtualizacaoMetaQA.predict_paths --input_dir Dataset/MetaQA --ckpt Dataset/Treino/1-hop/model-0.9722.pt --mode val --fixed_hops 1 --num_steps 1 --train_file Dataset/MetaQA/1-hop/qa_train_metaqa_1hop.txt --test_file Dataset/MetaQA/1-hop/qa_test_metaqa_1hop.txt
+
+python -m AtualizacaoMetaQA.predict_paths --input_dir Dataset/MetaQA --ckpt Dataset/Treino/2-hop/model-19-0.8691.pt --mode val --fixed_hops 2 --num_steps 2 --train_file Dataset/MetaQA/2-hop/qa_train_metaqa_2hop.txt --test_file Dataset/MetaQA/2-hop/qa_test_metaqa_2hop.txt
+
+python -m AtualizacaoMetaQA.predict_paths --input_dir Dataset/MetaQA --ckpt Dataset/Treino/3-hop/model-19-0.8167.pt --mode val --fixed_hops 3 --num_steps 3 --train_file Dataset/MetaQA/3-hop/qa_train_metaqa_3hop.txt --test_file Dataset/MetaQA/3-hop/qa_test_metaqa_3hop.txt
+
+python -m AtualizacaoMetaQA.predict_paths --input_dir "../../Dataset/WebQSP/TransferNETDataset"  --ckpt     --mode val --train_file "../../Dataset/WebQSP/TransferNETDataset/qa_train_webqsp.txt" --test_file "../../Dataset/WebQSP/TransferNETDataset/qa_test_com_data.txt"

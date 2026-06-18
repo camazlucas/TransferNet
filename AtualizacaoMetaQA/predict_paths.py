@@ -15,7 +15,6 @@ import json
 
 from IPython import embed
 
-
 def validate(args, model, data, device, kg_index, verbose = False):
     model.eval()
     count = 0
@@ -54,7 +53,17 @@ def validate(args, model, data, device, kg_index, verbose = False):
                     }
                 ]
 
-                for hop in range(len(outputs["rel_probs"])):
+                if args.fixed_hops is not None:
+                    max_hops = args.fixed_hops
+                else:
+                    max_hops = (
+                        outputs["hop_attn"][i]
+                        .argmax()
+                        .item()
+                        + 1
+                    )
+
+                for hop in range(max_hops):
 
                     rel_probs = outputs["rel_probs"][hop][i]
 
@@ -304,18 +313,35 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
 def main():
     parser = argparse.ArgumentParser()
-    # input and output
-    parser.add_argument('--input_dir', default = './input')
-    parser.add_argument('--ckpt', required = True)
+
+    parser.add_argument('--input_dir', default='./input')
+    parser.add_argument('--ckpt', required=True)
     parser.add_argument('--mode', default='val', choices=['val', 'vis', 'test'])
     parser.add_argument('--bert_name', default='bert-base-uncased')
+    parser.add_argument('--num_steps', type=int, default=3)
+    parser.add_argument('--fixed_hops', type=int, default=None)
+
+    parser.add_argument(
+        '--train_file',
+        type=str,
+        required=True
+    )
+
+    parser.add_argument(
+        '--test_file',
+        type=str,
+        required=True
+    )
+
     args = parser.parse_args()
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     ent2id, rel2id, triples, train_loader, val_loader = load_data(
     args.input_dir,
-    'bert-base-uncased',
-    16
+    args.bert_name,
+    16,
+    args.train_file,
+    args.test_file
     )
     #################################### Lista de Indices
     # data.id2ent = {v:k for k,v in ent2id.items()}
