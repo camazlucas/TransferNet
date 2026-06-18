@@ -117,6 +117,9 @@ def main():
     parser.add_argument('--input_dir', required=True, help='path to the data')
     parser.add_argument('--save_dir', required=True, help='path to save checkpoints and logs')
     parser.add_argument('--ckpt', default = None)
+    parser.add_argument('--train_file', type=str, required=True)
+    parser.add_argument('--test_file', type=str, required=True)
+    parser.add_argument('--num_steps', type=int, required=True)
     # training parameters
     parser.add_argument('--bert_lr', default=3e-5, type=float)
     parser.add_argument('--lr', default=0.001, type=float)
@@ -126,7 +129,8 @@ def main():
     parser.add_argument('--seed', type=int, default=666, help='random seed')
     parser.add_argument('--opt', default='radam', type = str)
     parser.add_argument('--warmup_proportion', default=0.1, type = float)
-    # model parameters
+
+        # model parameters
     parser.add_argument('--bert_name', default='bert-base-uncased', choices=['roberta-base', 'bert-base-uncased'])
     args = parser.parse_args()
 

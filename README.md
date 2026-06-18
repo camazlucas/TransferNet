@@ -130,7 +130,7 @@ python -m CompWebQ.train --input_dir <PATH/TO/UNZIPPED/DATA> --save_dir <PATH/TO
 
 ### Args Parse do MetaQA e WQSP
 
-python -m AtualizacaoMetaQA.predict_paths --input_dir Dataset/MetaQA --ckpt Dataset/Treino/1-hop/model-0.9722.pt --mode val --fixed_hops 1 --num_steps 1 --train_file Dataset/MetaQA/1-hop/qa_train_metaqa_1hop.txt --test_file Dataset/MetaQA/1-hop/qa_test_metaqa_1hop.txt
+python -m AtualizacaoMetaQA.predict_paths --input_dir Dataset/MetaQA --ckpt Dataset/Treino/1-hop/model-0-0.9722.pt --mode val --fixed_hops 1 --num_steps 1 --train_file Dataset/MetaQA/1-hop/qa_train_metaqa_1hop.txt --test_file Dataset/MetaQA/1-hop/qa_test_metaqa_1hop.txt
 
 python -m AtualizacaoMetaQA.predict_paths --input_dir Dataset/MetaQA --ckpt Dataset/Treino/2-hop/model-19-0.8691.pt --mode val --fixed_hops 2 --num_steps 2 --train_file Dataset/MetaQA/2-hop/qa_train_metaqa_2hop.txt --test_file Dataset/MetaQA/2-hop/qa_test_metaqa_2hop.txt
 
