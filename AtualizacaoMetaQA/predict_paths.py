@@ -39,6 +39,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
     candidate_sizes = []
 
     all_candidate_answers = []
+    outside_candidates = 0
 
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
@@ -186,9 +187,10 @@ def validate(args, model, data, device, kg_index, verbose = False):
                 predicted_entity = idx[i].item()
 
                 if predicted_entity not in all_candidate_answers[i]:
-                    print(
-                        f"Predição final fora dos candidatos: {predicted_entity}"
-                    )
+                    # print(
+                    #     f"Predição final fora dos candidatos: {predicted_entity}"
+                    # )
+                    outside_candidates += 1
 
             match_score = torch.gather(batch[2], 1, idx.unsqueeze(-1)).squeeze().tolist()
             count += len(match_score)
@@ -242,6 +244,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
     total_time = time.time() - total_start
 
+    inside_candidates = count - outside_candidates
+
     print(f"Total de triplas recuperadas: {total_triples}")
     print(f"Média por pergunta: {total_triples / count:.2f}")
     print(
@@ -282,6 +286,23 @@ def validate(args, model, data, device, kg_index, verbose = False):
     print(f"Tempo minimo: {np.min(question_times):.4f} s")
     print(f"Tempo maximo: {np.max(question_times):.4f} s")
     print(f"Desvio padrao: {np.std(question_times):.4f} s")
+
+    print(
+        f"Predições fora dos candidatos: "
+        f"{outside_candidates}"
+    )
+
+    print(
+        f"Percentual fora dos candidatos: "
+        f"{100 * outside_candidates / count:.2f}%"
+    )
+
+    print(f"Dentro dos candidatos: {inside_candidates}")
+    print(f"Fora dos candidatos: {outside_candidates}")
+    print(
+        f"Dentro dos candidatos (%): "
+        f"{100 * inside_candidates / count:.2f}%"
+    )
 
     hop_report = []
 
