@@ -15,6 +15,8 @@ import json
 
 from IPython import embed
 
+from statistics import median, mode
+
 
 
 def validate(args, model, data, device, kg_index, verbose = False):
@@ -34,6 +36,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
     total_triples = 0
     candidate_entity_count = 0
     candidate_entity_count_max = 0
+    candidate_sizes = []
 
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
@@ -115,6 +118,10 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                 candidate_entity_count_max = max(
                     candidate_entity_count_max,
+                    len(candidate_answers)
+                )
+
+                candidate_sizes.append(
                     len(candidate_answers)
                 )
 
@@ -230,6 +237,26 @@ def validate(args, model, data, device, kg_index, verbose = False):
     print(
         f"Máximo de entidades candidatas: "
         f"{candidate_entity_count_max}"
+    )
+
+    print(
+        f"Mediana candidatos: "
+        f"{median(candidate_sizes):.2f}"
+    )
+
+    print(
+        f"Moda candidatos: "
+        f"{mode(candidate_sizes)}"
+    )
+
+    print(
+        f"P90 candidatos: "
+        f"{np.percentile(candidate_sizes, 90):.2f}"
+    )
+
+    print(
+        f"P95 candidatos: "
+        f"{np.percentile(candidate_sizes, 95):.2f}"
     )
 
     print(f"Hits@1: {overall_acc:.4f}")
