@@ -60,12 +60,11 @@ def validate(args, model, data, device, kg_index, verbose = False):
                         + 1
                     )
 
-                previous_entities = {head_id: 1.0}
+                previous_entities = {head_id}
 
                 for hop in range(max_hops):
 
                     rel_probs = outputs["rel_probs"][hop][i]
-                    ent_probs = outputs["ent_probs"][hop][i]
 
                     if args.relation_mode == "softmax":
 
@@ -91,9 +90,9 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                             selected_rel_ids = top_rel_ids.tolist()
 
-                    next_entities = {}
+                    next_entities = set()
 
-                    for subj, path_score in previous_entities.items():
+                    for subj in previous_entities:
 
                         for rel_id in selected_rel_ids:
 
@@ -104,50 +103,17 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                             for tail_id in tails:
 
-                                entity_score = float(
-                                    ent_probs[tail_id]
-                                )
-
-                                if entity_score < 1e-6:
-                                    continue
-
-                                relation_score = float(
-                                    rel_probs[rel_id]
-                                )
-
-                                triple_score = (
-                                    relation_score
-                                    * entity_score
-                                )
-
-                                new_score = (
-                                    path_score
-                                    * triple_score
-                                )
-
-                                next_entities[tail_id] = max(
-                                    next_entities.get(
-                                        tail_id,
-                                        0.0
-                                    ),
-                                    new_score
-                                )
-
                                 total_triples += 1
+
+                                next_entities.add(
+                                    tail_id
+                                )
 
 
                     if len(next_entities) == 0:
                         break
 
-                    sorted_entities = sorted(
-                        next_entities.items(),
-                        key=lambda x: x[1],
-                        reverse=True
-                    )
-
-                    previous_entities = dict(
-                        sorted_entities[:50]
-                    )
+                    previous_entities = next_entities
 
                 candidate_answers = set(previous_entities)
 
