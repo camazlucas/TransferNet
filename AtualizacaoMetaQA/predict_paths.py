@@ -32,6 +32,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
     total_start = time.time()
 
     total_triples = 0
+    candidate_entity_count = 0
 
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
@@ -108,6 +109,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
                     previous_entities = next_entities
 
                 candidate_answers = set(previous_entities)
+
+                candidate_entity_count += len(candidate_answers)
 
 
                 gold_answers = set(
@@ -214,6 +217,10 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
     print(f"Total de triplas recuperadas: {total_triples}")
     print(f"Média por pergunta: {total_triples / count:.2f}")
+    print(
+        f"Entidades candidatas médias: "
+        f"{candidate_entity_count / count:.2f}"
+    )
 
     print(f"Hits@1: {overall_acc:.4f}")
     print(f"Candidate Hits: {candidate_hits_rate:.4f}")
