@@ -132,60 +132,60 @@ def load_data(
     train_file,
     test_file
 ):
-    cache_fn = os.path.join(input_dir, 'processed_metaQA.pt')
-    if os.path.exists(cache_fn):
-        print('Read from cache file: {} (NOTE: delete it if you modified data loading process)'.format(cache_fn))
-        with open(cache_fn, 'rb') as fp:
-            ent2id, rel2id, triples, train_data, test_data = pickle.load(fp)
-        print('Train number: {}, test number: {}'.format(len(train_data.dataset), len(test_data.dataset)))
-    else:
-        print('Read data...')
-        ent2id = {}
-        print("Lendo entities.dict")
-        for line in open(os.path.join(input_dir, 'entities.dict'), encoding = 'utf-8'):
-            l = line.strip().split('\t')
-            ent2id[l[0].strip()] = len(ent2id)
+    # cache_fn = os.path.join(input_dir, 'processed_metaQA.pt')
+    # if os.path.exists(cache_fn):
+    #     print('Read from cache file: {} (NOTE: delete it if you modified data loading process)'.format(cache_fn))
+    #     with open(cache_fn, 'rb') as fp:
+    #         ent2id, rel2id, triples, train_data, test_data = pickle.load(fp)
+    #     print('Train number: {}, test number: {}'.format(len(train_data.dataset), len(test_data.dataset)))
+    # else:
+    print('Read data...')
+    ent2id = {}
+    print("Lendo entities.dict")
+    for line in open(os.path.join(input_dir, 'entities.dict'), encoding = 'utf-8'):
+        l = line.strip().split('\t')
+        ent2id[l[0].strip()] = len(ent2id)
         # print(len(ent2id))
         # print(max(ent2id.values()))
-        rel2id = {}
-        print("Lendo relations.dict")
-        for line in open(os.path.join(input_dir, 'relations.dict'), encoding = 'utf-8'):
-            l = line.strip().split('\t')
-            rel2id[l[0].strip()] = int(l[1])
+    rel2id = {}
+    print("Lendo relations.dict")
+    for line in open(os.path.join(input_dir, 'relations.dict'), encoding = 'utf-8'):
+        l = line.strip().split('\t')
+        rel2id[l[0].strip()] = int(l[1])
 
-        triples = []
-        print("Lendo kb.tsv")
-        for line in open(os.path.join(input_dir, 'kb.tsv'), encoding = 'utf-8'):
-            l = line.strip().split('\t')
-            s = ent2id[l[0].strip()]
-            p = rel2id[l[1].strip()]
-            o = ent2id[l[2].strip()]
-            triples.append((s, p, o))
-            p_rev = rel2id[l[1].strip()+'_reverse']
-            triples.append((o, p_rev, s))
-        triples = torch.LongTensor(triples)
-        print("KB carregada")
+    triples = []
+    print("Lendo kb.tsv")
+    for line in open(os.path.join(input_dir, 'kb.tsv'), encoding = 'utf-8'):
+        l = line.strip().split('\t')
+        s = ent2id[l[0].strip()]
+        p = rel2id[l[1].strip()]
+        o = ent2id[l[2].strip()]
+        triples.append((s, p, o))
+        p_rev = rel2id[l[1].strip()+'_reverse']
+        triples.append((o, p_rev, s))
+    triples = torch.LongTensor(triples)
+    print("KB carregada")
 
-        train_data = DataLoader(
-            input_dir,
-            train_file,
-            bert_name,
-            ent2id,
-            rel2id,
-            batch_size,
-            training=True
-        )
+    train_data = DataLoader(
+        input_dir,
+        train_file,
+        bert_name,
+        ent2id,
+        rel2id,
+        batch_size,
+        training=True
+    )
 
-        test_data = DataLoader(
-            input_dir,
-            test_file,
-            bert_name,
-            ent2id,
-            rel2id,
-            batch_size
-        )
+    test_data = DataLoader(
+        input_dir,
+        test_file,
+        bert_name,
+        ent2id,
+        rel2id,
+        batch_size
+    )
     
-        with open(cache_fn, 'wb') as fp:
-            pickle.dump((ent2id, rel2id, triples, train_data, test_data), fp)
+        # with open(cache_fn, 'wb') as fp:
+        #     pickle.dump((ent2id, rel2id, triples, train_data, test_data), fp)
 
     return ent2id, rel2id, triples, train_data, test_data
