@@ -87,6 +87,11 @@ class DataLoader(torch.utils.data.DataLoader):
 
             ans = line[1].split('|')
 
+            ans = [a for a in ans if a in ent2id]
+
+            if len(ans) == 0:
+                continue
+
 
             # if (head, ans[0]) not in so_map:
             #     continue
