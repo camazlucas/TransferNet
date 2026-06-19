@@ -15,6 +15,8 @@ import json
 
 from IPython import embed
 
+
+
 def validate(args, model, data, device, kg_index, verbose = False):
     model.eval()
     count = 0
@@ -66,12 +68,10 @@ def validate(args, model, data, device, kg_index, verbose = False):
                 for hop in range(max_hops):
 
                     rel_probs = outputs["rel_probs"][hop][i]
+                    ent_probs = outputs["ent_probs"][hop][i]
 
-                    selected_rel_ids = (
-                        rel_probs > 0.8
-                    ).nonzero().squeeze(1).tolist()
-
-                    if len(selected_rel_ids) == 0:
+                    # MetaQA (softmax)
+                    if args.relation_mode == "softmax":
 
                         _, top_rel_ids = torch.topk(
                             rel_probs,
@@ -79,6 +79,22 @@ def validate(args, model, data, device, kg_index, verbose = False):
                         )
 
                         selected_rel_ids = top_rel_ids.tolist()
+
+                    # WebQSP (sigmoid)
+                    else:
+
+                        selected_rel_ids = (
+                            rel_probs > 0.8
+                        ).nonzero().squeeze(1).tolist()
+
+                        if len(selected_rel_ids) == 0:
+
+                            _, top_rel_ids = torch.topk(
+                                rel_probs,
+                                k=3
+                            )
+
+                            selected_rel_ids = top_rel_ids.tolist()
 
                     new_paths = []
 
@@ -95,6 +111,12 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                             for tail_id in tails:
 
+                                ent_prob = float(ent_probs[tail_id])
+
+                                # poda leve
+                                if ent_prob < 0.01:
+                                    continue
+
                                 new_path = {
                                     "entity": tail_id,
                                     "triples": path["triples"] + [[
@@ -105,19 +127,11 @@ def validate(args, model, data, device, kg_index, verbose = False):
                                     "score": (
                                         path["score"]
                                         * float(rel_probs[rel_id])
+                                        * ent_prob
                                     )
                                 }
 
                                 new_paths.append(new_path)
-
-                    if len(new_paths) > 100:
-
-                        new_paths.sort(
-                            key=lambda x: x["score"],
-                            reverse=True
-                        )
-
-                        new_paths = new_paths[:100]
 
 
                     if len(new_paths) == 0:
@@ -320,6 +334,11 @@ def main():
     parser.add_argument('--bert_name', default='bert-base-uncased')
     parser.add_argument('--num_steps', type=int, default=3)
     parser.add_argument('--fixed_hops', type=int, default=None)
+    parser.add_argument(
+        "--relation_mode",
+        choices=["softmax", "sigmoid"],
+        required=True
+    )
 
     parser.add_argument(
         '--train_file',
