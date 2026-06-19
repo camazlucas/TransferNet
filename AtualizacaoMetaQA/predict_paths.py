@@ -38,6 +38,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
     candidate_entity_count_max = 0
     candidate_sizes = []
 
+    all_candidate_answers = []
+
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
             outputs = model(*batch_device(batch, device)) # [bsz, Esize]
@@ -124,6 +126,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
                 candidate_sizes.append(
                     len(candidate_answers)
                 )
+                
+                all_candidate_answers.append(candidate_answers)
 
 
                 gold_answers = set(
@@ -176,6 +180,16 @@ def validate(args, model, data, device, kg_index, verbose = False):
             
             e_score = outputs['e_score'].cpu()
             scores, idx = torch.max(e_score, dim = 1) # [bsz], [bsz]
+
+            for i in range(len(batch[0])):
+
+                predicted_entity = idx[i].item()
+
+                if predicted_entity not in all_candidate_answers[i]:
+                    print(
+                        f"Predição final fora dos candidatos: {predicted_entity}"
+                    )
+
             match_score = torch.gather(batch[2], 1, idx.unsqueeze(-1)).squeeze().tolist()
             count += len(match_score)
             correct += sum(match_score)
