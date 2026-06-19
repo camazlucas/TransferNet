@@ -55,7 +55,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
                 for hop in range(max_hops):
 
                     rel_probs = outputs["rel_probs"][hop][i]
-                    ent_probs = outputs["ent_probs"][hop][i]
 
                     if args.relation_mode == "softmax":
 
@@ -81,17 +80,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                             selected_rel_ids = top_rel_ids.tolist()
 
-                    k_ent = min(50, ent_probs.shape[0])
-
-                    _, top_ent_ids = torch.topk(
-                        ent_probs,
-                        k_ent
-                    )
-
-                    top_ent_ids = set(
-                        top_ent_ids.tolist()
-                    )
-
                     next_entities = set()
 
                     for subj in previous_entities:
@@ -105,9 +93,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                             for tail_id in tails:
 
-                                if tail_id not in top_ent_ids:
-                                    continue
-
                                 next_entities.add(
                                     tail_id
                                 )
@@ -117,9 +102,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                     previous_entities = next_entities
 
-                # bloco de recuperação
-
                 candidate_answers = set(previous_entities)
+
 
                 gold_answers = set(
                     batch[2][i]
@@ -223,10 +207,15 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
     total_time = time.time() - total_start
 
-    print(f"Overall accuracy: {overall_acc:.4f}")
+    print(f"Hits@1: {overall_acc:.4f}")
     print(f"Candidate Hits: {candidate_hits_rate:.4f}")
     print(f"Candidate Recall: {candidate_recall:.4f}")
     print(f"F1: {candidate_f1:.4f}")
+    print(f"Tempo total: {total_time:.2f} s")
+    print(f"Tempo medio: {np.mean(question_times):.4f} s")
+    print(f"Tempo minimo: {np.min(question_times):.4f} s")
+    print(f"Tempo maximo: {np.max(question_times):.4f} s")
+    print(f"Desvio padrao: {np.std(question_times):.4f} s")
 
     hop_report = []
 
