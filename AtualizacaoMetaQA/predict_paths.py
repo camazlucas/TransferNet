@@ -137,14 +137,17 @@ def validate(args, model, data, device, kg_index, verbose = False):
                                 )
 
                                 hop_triples.append(
-                                    [
-                                        [
-                                            data.id2ent[subj],
-                                            data.id2rel[rel_id],
-                                            data.id2ent[tail_id]
-                                        ],
+                                    {
+                                        "tail_id": tail_id,
+                                        "data": [
+                                            [
+                                                data.id2ent[subj],
+                                                data.id2rel[rel_id],
+                                                data.id2ent[tail_id]
+                                            ],
                                             float(triple_score)
-                                    ]
+                                        ]
+                                    }
                                 )
 
                                 new_score = (
@@ -162,8 +165,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                                 total_triples += 1
 
-                    
-                    question_result[f"hop_{hop+1}"] = hop_triples
 
                     if len(next_entities) == 0:
                         break
@@ -177,6 +178,19 @@ def validate(args, model, data, device, kg_index, verbose = False):
                     previous_entities = dict(
                         sorted_entities[:50]
                     )
+
+                    surviving_entities = set(
+                        previous_entities.keys()
+                    )
+
+                    hop_triples = [
+                        t["data"]
+                        for t in hop_triples
+                        if t["tail_id"] in surviving_entities
+                    ]
+
+                    question_result[f"hop_{hop+1}"] = hop_triples
+
 
                 candidate_answers = set(previous_entities)
 
