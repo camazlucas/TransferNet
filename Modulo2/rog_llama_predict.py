@@ -2,6 +2,8 @@ import json
 import re
 import torch
 import argparse
+import time
+import numpy as np
 
 from tqdm import tqdm
 from transformers import (
@@ -202,6 +204,12 @@ def predict(sample):
 # MAIN
 # ==========================================================
 
+precision_sum = 0.0
+recall_sum = 0.0
+f1_sum = 0.0
+
+inference_times = []
+
 with open(
     args.json_path,
     "r",
@@ -216,8 +224,16 @@ results = []
 
 for sample in tqdm(dataset):
 
+    start_time = time.time()
+
     predicted_answers, raw_response = predict(
         sample
+    )
+
+    elapsed = time.time() - start_time
+
+    inference_times.append(
+        elapsed
     )
 
     gold_answers = set(
@@ -235,13 +251,59 @@ for sample in tqdm(dataset):
 
         first_prediction = ""
 
+    predicted_set = set(
+        predicted_answers
+    )
+
+    intersection = (
+        predicted_set &
+        gold_answers
+    )
+
+    if first_prediction in gold_answers:
+        hits += 1
+
+    if len(predicted_set) > 0:
+
+        precision = (
+            len(intersection)
+            / len(predicted_set)
+        )
+
+    else:
+
+        precision = 0.0
+
+    if len(gold_answers) > 0:
+
+        recall = (
+            len(intersection)
+            / len(gold_answers)
+        )
+
+    else:
+
+        recall = 0.0
+
+    if precision + recall > 0:
+
+        f1 = (
+            2 * precision * recall
+            / (precision + recall)
+        )
+
+    else:
+
+        f1 = 0.0
+
+    precision_sum += precision
+    recall_sum += recall
+    f1_sum += f1
+
     correct = (
         first_prediction
         in gold_answers
     )
-
-    if correct:
-        hits += 1
 
     results.append(
         {
@@ -256,10 +318,54 @@ for sample in tqdm(dataset):
 
 hits1 = hits / len(dataset)
 
+precision_avg = (
+    precision_sum
+    / len(dataset)
+)
+
+recall_avg = (
+    recall_sum
+    / len(dataset)
+)
+
+f1_avg = (
+    f1_sum
+    / len(dataset)
+)
+
+avg_time = np.mean(
+    inference_times
+)
+
+min_time = np.min(
+    inference_times
+)
+
+max_time = np.max(
+    inference_times
+)
+
+std_time = np.std(
+    inference_times
+)
+
+total_time = np.sum(
+    inference_times
+)
+
 print()
 print("=" * 60)
 print(f"Hits@1: {hits1:.4f}")
+print(f"Precision: {precision_avg:.4f}")
+print(f"Recall: {recall_avg:.4f}")
+print(f"F1: {f1_avg:.4f}")
 print("=" * 60)
+
+print(f"Tempo total: {total_time:.2f} s")
+print(f"Tempo médio: {avg_time:.4f} s")
+print(f"Tempo mínimo: {min_time:.4f} s")
+print(f"Tempo máximo: {max_time:.4f} s")
+print(f"Desvio padrão: {std_time:.4f} s")
 
 with open(
     args.output_path,
