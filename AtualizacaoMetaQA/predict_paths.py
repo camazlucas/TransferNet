@@ -205,17 +205,19 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                 if total_hop_triples > 50:
 
-                    question_result["hop_1"] = (
-                        question_result["hop_1"][:10]
-                    )
+                    hop_limits = {
+                        "hop_1": 10,
+                        "hop_2": 15,
+                        "hop_3": 25
+                    }
 
-                    question_result["hop_2"] = (
-                        question_result["hop_2"][:15]
-                    )
+                    for hop_name, limit in hop_limits.items():
 
-                    question_result["hop_3"] = (
-                        question_result["hop_3"][:25]
-                    )
+                        if hop_name in question_result:
+
+                            question_result[hop_name] = (
+                                question_result[hop_name][:limit]
+                            )
 
                 results.append(question_result)
 
