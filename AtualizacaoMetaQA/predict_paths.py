@@ -54,13 +54,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
                     skip_special_tokens=True
                 )
 
-                question_result = {
-                    "question": question
-                }
-
-                for h in range(max_hops):
-                    question_result[f"hop_{h+1}"] = []
-
                 head_id = batch[0][i].argmax().item()
 
                 if args.fixed_hops is not None:
@@ -72,6 +65,13 @@ def validate(args, model, data, device, kg_index, verbose = False):
                         .item()
                         + 1
                     )
+                
+                question_result = {
+                    "question": question
+                }
+
+                for h in range(max_hops):
+                    question_result[f"hop_{h+1}"] = []
 
                 previous_entities = {head_id: 1.0}
 
