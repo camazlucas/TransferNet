@@ -151,4 +151,10 @@ python -m AtualizacaoMetaQA.train --input_dir "../../Dataset/WebQSP/TransferNETD
 
 ##### Predicao com o Llama
 
-python Modulo2/answer_predict.py --model_path "../../Dataset/LLM/RoG/ --json_path predicted_paths_transfernet.json --output_path results_llama.json
+python Modulo2/rog_llama_predict.py --model_path "../../Dataset/LLM/RoG/" --json_path predicted_paths_transfernet_1hop.json --output_path Modulo2/Resultados/results_1hop.json
+
+python Modulo2/rog_llama_predict.py --model_path "../../Dataset/LLM/RoG/" --json_path predicted_paths_transfernet_2hop.json --output_path Modulo2/Resultados/results_2hop.json
+
+python Modulo2/rog_llama_predict.py --model_path "../../Dataset/LLM/RoG/" --json_path predicted_paths_transfernet_3hop.json --output_path Modulo2/Resultados/results_3hop.json
+
+python Modulo2/rog_llama_predict.py --model_path "../../Dataset/LLM/RoG/" --json_path predicted_paths_transfernet_wqsp.json --output_path Modulo2/Resultados/results_wqsp.json

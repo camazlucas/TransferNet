@@ -11,6 +11,10 @@ from transformers import (
     AutoModelForCausalLM
 )
 
+from transformers.utils import logging
+
+logging.set_verbosity_error()
+
 # ==========================================================
 # CONFIG
 # ==========================================================
