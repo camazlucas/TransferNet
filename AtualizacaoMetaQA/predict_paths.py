@@ -120,6 +120,9 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                             for tail_id in tails:
 
+                                if hop > 0 and tail_id == head_id:
+                                    continue
+
                                 entity_score = float(
                                     ent_probs[tail_id]
                                 )
