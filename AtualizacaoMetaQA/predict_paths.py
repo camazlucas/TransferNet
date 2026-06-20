@@ -38,8 +38,7 @@ def validate(args, model, data, device, kg_index, verbose = False):
     candidate_entity_count_max = 0
     candidate_sizes = []
 
-    all_candidate_answers = []
-    outside_candidates = 0
+    results = []
 
     with torch.no_grad():
         for batch in tqdm(data, total=len(data)):
@@ -47,6 +46,20 @@ def validate(args, model, data, device, kg_index, verbose = False):
             for i in range(len(batch[0])):
 
                 q_start = time.time()
+
+                question_ids = batch[1]["input_ids"][i].tolist()
+
+                question = data.tokenizer.decode(
+                    question_ids,
+                    skip_special_tokens=True
+                )
+
+                question_result = {
+                    "question": question
+                }
+
+                for h in range(max_hops):
+                    question_result[f"hop_{h+1}"] = []
 
                 head_id = batch[0][i].argmax().item()
 
@@ -93,6 +106,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                     next_entities = {}
 
+                    hop_triples = []
+
                     for subj, path_score in previous_entities.items():
 
                         for rel_id in selected_rel_ids:
@@ -120,6 +135,17 @@ def validate(args, model, data, device, kg_index, verbose = False):
                                     * entity_score
                                 )
 
+                                hop_triples.append(
+                                    [
+                                        [
+                                            data.id2ent[subj],
+                                            data.id2rel[rel_id],
+                                            data.id2ent[tail_id]
+                                        ],
+                                            float(triple_score)
+                                    ]
+                                )
+
                                 new_score = (
                                     path_score
                                     * triple_score
@@ -135,6 +161,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                                 total_triples += 1
 
+                    
+                    question_result[f"hop_{hop+1}"] = hop_triples
 
                     if len(next_entities) == 0:
                         break
@@ -151,6 +179,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                 candidate_answers = set(previous_entities)
 
+                results.append(question_result)
+
                 candidate_entity_count += len(candidate_answers)
 
                 candidate_entity_count_max = max(
@@ -161,9 +191,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
                 candidate_sizes.append(
                     len(candidate_answers)
                 )
-                
-                all_candidate_answers.append(candidate_answers)
-
 
                 gold_answers = set(
                     batch[2][i]
@@ -215,16 +242,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
             
             e_score = outputs['e_score'].cpu()
             scores, idx = torch.max(e_score, dim = 1) # [bsz], [bsz]
-
-            for i in range(len(batch[0])):
-
-                predicted_entity = idx[i].item()
-
-                if predicted_entity not in all_candidate_answers[i]:
-                    # print(
-                    #     f"Predição final fora dos candidatos: {predicted_entity}"
-                    # )
-                    outside_candidates += 1
 
             match_score = torch.gather(batch[2], 1, idx.unsqueeze(-1)).squeeze().tolist()
             count += len(match_score)
@@ -278,7 +295,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
     total_time = time.time() - total_start
 
-    inside_candidates = count - outside_candidates
 
     print(f"Total de triplas recuperadas: {total_triples}")
     print(f"Média por pergunta: {total_triples / count:.2f}")
@@ -321,23 +337,6 @@ def validate(args, model, data, device, kg_index, verbose = False):
     print(f"Tempo maximo: {np.max(question_times):.4f} s")
     print(f"Desvio padrao: {np.std(question_times):.4f} s")
 
-    print(
-        f"Predições fora dos candidatos: "
-        f"{outside_candidates}"
-    )
-
-    print(
-        f"Percentual fora dos candidatos: "
-        f"{100 * outside_candidates / count:.2f}%"
-    )
-
-    print(f"Dentro dos candidatos: {inside_candidates}")
-    print(f"Fora dos candidatos: {outside_candidates}")
-    print(
-        f"Dentro dos candidatos (%): "
-        f"{100 * inside_candidates / count:.2f}%"
-    )
-
     hop_report = []
 
     for hop in range(model.num_steps):
@@ -355,6 +354,19 @@ def validate(args, model, data, device, kg_index, verbose = False):
         "Pred hop accuracy: "
         + ", ".join(hop_report)
     )
+
+    with open(
+        "predicted_paths_transfernet.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+        json.dump(
+            results,
+            f,
+            ensure_ascii=False,
+            indent=2
+        )
 
     return overall_acc
 

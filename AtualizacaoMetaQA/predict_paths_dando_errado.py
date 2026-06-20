@@ -79,6 +79,9 @@ def validate(args, model, data, device, kg_index, verbose = False):
                         top_ent_ids.tolist()
                     )
 
+                    if tail_id not in allowed_entities:
+                        continue
+
                     # MetaQA (softmax)
                     if args.relation_mode == "softmax":
 

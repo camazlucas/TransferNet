@@ -17,8 +17,8 @@ def validate(args, model, data, device, verbose = False):
     correct = 0
     hop_count = defaultdict(list)
     with torch.no_grad():
-        for batch in tqdm(data, total=len(data)):
-            outputs = model(*batch_device(batch, device)) # [bsz, Esize]
+        for batch in tqdm(data, total=len(data)): # Percorre todos os batches
+            outputs = model(*batch_device(batch, device)) # [bsz, Esize] # Score das entidades, 
             e_score = outputs['e_score'].cpu()
             scores, idx = torch.max(e_score, dim = 1) # [bsz], [bsz]
             match_score = torch.gather(batch[2], 1, idx.unsqueeze(-1)).squeeze().tolist()
