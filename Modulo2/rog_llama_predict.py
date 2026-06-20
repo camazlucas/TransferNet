@@ -109,8 +109,6 @@ Answer:
 
 def parse_response(text):
 
-    text = text.strip()
-
     try:
 
         match = re.search(
@@ -138,20 +136,25 @@ def parse_response(text):
     except Exception:
         pass
 
-    text = text.replace("\n", " ")
+    lines = [
+        x.strip()
+        for x in text.split("\n")
+        if len(x.strip()) > 0
+    ]
+
+    if len(lines) > 1:
+        return lines
 
     answers = re.split(
         r";|,",
         text
     )
 
-    answers = [
+    return [
         a.strip()
         for a in answers
         if len(a.strip()) > 0
     ]
-
-    return answers
 
 # ==========================================================
 # INFERENCE
