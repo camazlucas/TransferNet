@@ -56,6 +56,15 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                 head_id = batch[0][i].argmax().item()
 
+                gold_answers_n = [
+                    data.id2ent[x]
+                    for x in batch[2][i]
+                        .gt(0.9)
+                        .nonzero()
+                        .squeeze(1)
+                        .tolist()
+                ]
+
                 if args.fixed_hops is not None:
                     max_hops = args.fixed_hops
                 else:
@@ -68,7 +77,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
                 
                 question_result = {
                     "question": question,
-                    "head_entity": data.id2ent[head_id]
+                    "head_entity": data.id2ent[head_id],
+                    "gold_answers": gold_answers_n
                 }
 
                 for h in range(max_hops):
