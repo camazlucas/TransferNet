@@ -67,7 +67,8 @@ def validate(args, model, data, device, kg_index, verbose = False):
                     )
                 
                 question_result = {
-                    "question": question
+                    "question": question,
+                    "head_entity": data.id2ent[head_id]
                 }
 
                 for h in range(max_hops):
