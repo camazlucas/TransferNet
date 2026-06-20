@@ -197,6 +197,26 @@ def validate(args, model, data, device, kg_index, verbose = False):
 
                 candidate_answers = set(previous_entities)
 
+                total_hop_triples = (
+                    len(question_result.get("hop_1", []))
+                    + len(question_result.get("hop_2", []))
+                    + len(question_result.get("hop_3", []))
+                )
+
+                if total_hop_triples > 50:
+
+                    question_result["hop_1"] = (
+                        question_result["hop_1"][:10]
+                    )
+
+                    question_result["hop_2"] = (
+                        question_result["hop_2"][:15]
+                    )
+
+                    question_result["hop_3"] = (
+                        question_result["hop_3"][:25]
+                    )
+
                 results.append(question_result)
 
                 candidate_entity_count += len(candidate_answers)
