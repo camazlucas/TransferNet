@@ -1,9 +1,13 @@
 import json
 import re
-from tqdm import tqdm
-from llama_cpp import Llama
+import torch
 import argparse
 
+from tqdm import tqdm
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM
+)
 
 # ==========================================================
 # CONFIG
@@ -29,20 +33,33 @@ parser.add_argument(
     required=True
 )
 
-args = parser.parse_args()
+parser.add_argument(
+    "--max_new_tokens",
+    type=int,
+    default=128
+)
 
+args = parser.parse_args()
 
 # ==========================================================
 # LLM
 # ==========================================================
 
-llm = Llama(
-    model_path=args.model_path,
-    n_ctx=4096,
-    n_gpu_layers=-1,
-    verbose=False
+print("Carregando tokenizer...")
+
+tokenizer = AutoTokenizer.from_pretrained(
+    args.model_path
 )
 
+print("Carregando modelo...")
+
+model = AutoModelForCausalLM.from_pretrained(
+    args.model_path,
+    torch_dtype=torch.float16,
+    device_map="auto"
+)
+
+model.eval()
 
 # ==========================================================
 # PROMPT
@@ -71,8 +88,7 @@ def build_prompt(sample):
 
     reasoning_text = "\n".join(reasoning_paths)
 
-    prompt = f"""
-Based on the reasoning paths, please answer the given question.
+    prompt = f"""Based on the reasoning paths, please answer the given question.
 
 Please keep the answer as simple as possible and return all the possible answers as a list.
 
@@ -82,24 +98,18 @@ Reasoning Paths:
 Question:
 {sample["question"]}
 
-Return ONLY a JSON in the format:
-
-{{
-    "answers": [
-        "answer_1",
-        "answer_2"
-    ]
-}}
+Answer:
 """
 
     return prompt
-
 
 # ==========================================================
 # PARSER
 # ==========================================================
 
 def parse_response(text):
+
+    text = text.strip()
 
     try:
 
@@ -128,8 +138,20 @@ def parse_response(text):
     except Exception:
         pass
 
-    return []
+    text = text.replace("\n", " ")
 
+    answers = re.split(
+        r";|,",
+        text
+    )
+
+    answers = [
+        a.strip()
+        for a in answers
+        if len(a.strip()) > 0
+    ]
+
+    return answers
 
 # ==========================================================
 # INFERENCE
@@ -139,19 +161,39 @@ def predict(sample):
 
     prompt = build_prompt(sample)
 
-    output = llm(
+    inputs = tokenizer(
         prompt,
-        max_tokens=128,
-        temperature=0,
-        stop=[
-            "</s>"
-        ]
+        return_tensors="pt",
+        truncation=True,
+        max_length=4096
     )
 
-    text = output["choices"][0]["text"]
+    inputs = {
+        k: v.to(model.device)
+        for k, v in inputs.items()
+    }
 
-    return parse_response(text)
+    with torch.no_grad():
 
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=args.max_new_tokens,
+            do_sample=False,
+            temperature=0.0,
+            pad_token_id=tokenizer.eos_token_id
+        )
+
+    generated_tokens = outputs[
+        0,
+        inputs["input_ids"].shape[1]:
+    ]
+
+    response = tokenizer.decode(
+        generated_tokens,
+        skip_special_tokens=True
+    )
+
+    return parse_response(response), response
 
 # ==========================================================
 # MAIN
@@ -171,7 +213,9 @@ results = []
 
 for sample in tqdm(dataset):
 
-    predicted_answers = predict(sample)
+    predicted_answers, raw_response = predict(
+        sample
+    )
 
     gold_answers = set(
         sample["gold_answers"]
@@ -201,6 +245,7 @@ for sample in tqdm(dataset):
             "question": sample["question"],
             "head_entity": sample["head_entity"],
             "prediction": predicted_answers,
+            "raw_response": raw_response,
             "gold_answers": sample["gold_answers"],
             "correct": correct
         }

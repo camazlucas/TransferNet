@@ -147,3 +147,8 @@ python -m AtualizacaoMetaQA.train --input_dir Dataset/MetaQA --save_dir Dataset/
 python -m AtualizacaoMetaQA.train --input_dir Dataset/MetaQA --save_dir Dataset/Treino/3-hop_fixo --num_steps 3 --train_file Dataset/MetaQA/3-hop/qa_train_metaqa_3hop.txt --test_file Dataset/MetaQA/3-hop/qa_valid_metaqa_3hop.txt 
 
 python -m AtualizacaoMetaQA.train --input_dir "../../Dataset/WebQSP/TransferNETDataset" --save_dir Dataset/Treino/WQSP --num_steps 2 --train_file "../../Dataset/WebQSP/TransferNETDataset/qa_train_webqsp.txt" --test_file "../../Dataset/WebQSP/TransferNETDataset/qa_test_webqsp.txt" --batch_size 32
+
+
+##### Predicao com o Llama
+
+python Modulo2/answer_predict.py --model_path "../../Dataset/LLM/RoG/ --json_path predicted_paths_transfernet.json --output_path results_llama.json
