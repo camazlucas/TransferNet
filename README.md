@@ -158,3 +158,6 @@ python Modulo2/rog_llama_predict.py --model_path "../../Dataset/LLM/RoG/" --json
 python Modulo2/rog_llama_predict.py --model_path "../../Dataset/LLM/RoG/" --json_path predicted_paths_transfernet_3hop.json --output_path Modulo2/Resultados/results_3hop.json
 
 python Modulo2/rog_llama_predict.py --model_path "../../Dataset/LLM/RoG/" --json_path predicted_paths_transfernet_wqsp.json --output_path Modulo2/Resultados/results_wqsp.json
+
+
+

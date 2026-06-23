@@ -104,6 +104,8 @@ Reasoning Paths:
 Question:
 {sample["question"]}
 
+Return all valid answers as a list.
+
 Answer:
 """
 
